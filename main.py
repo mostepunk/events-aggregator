@@ -1,41 +1,41 @@
 import asyncio
-from contextlib import asynccontextmanager
+from pprint import pprint
+from uuid import uuid4
 
-from pymongo import AsyncMongoClient
-
+from app.adapters.db import get_database, init_mongodb
 from app.adapters.db.cruds.event import EventCRUD
 from app.adapters.schemas.events import EventCreateSchema
-from app.settings import config
-
-
-@asynccontextmanager
-async def mongodb():
-    mongodb_client = AsyncMongoClient(config.mongo.uri)
-    database = mongodb_client[config.mongo.db_name]
-    print(
-        f"Connected to {config.mongo.host, config.mongo.port}"
-        f" DB: {config.mongo.db_name}"
-    )
-    try:
-        yield database
-    # except Exception as e:
-    #     print(f"MongoError: {e}")
-    finally:
-        await mongodb_client.close()
 
 
 def event_data():
-    data = {"event_type": "notification", "event_data": {"test": "new value"}}
+    data = {
+        "event_type": "notification",
+        "event_data": {"username": "Pupkin", "redirect_url": "https://example.com"},
+        "user_id": str(uuid4()),
+        "source": "email",
+        "level": "info",
+        "tags": ["tag1", "tag2"],
+    }
     return EventCreateSchema(**data)
 
 
 async def main():
-    async with mongodb() as db:
+    await init_mongodb()
+
+    async with get_database() as db:
         crud = EventCRUD(db)
 
-        data = event_data()
-        item = await crud.create(data)
-        print(f"{item=}")
+        # data = event_data()
+        # item = await crud.create(data)
+        # print(item)
+
+        # data = [event_data().dict() for _ in range(10)]
+        # res = await crud.bulk_create(data)
+        # print(f"Created {len(res)} events: {res}")
+
+        items = await crud.get_unprocessed_events()
+        print(f"Found {len(items)} events")
+        pprint(items)
 
 
 asyncio.run(main())
