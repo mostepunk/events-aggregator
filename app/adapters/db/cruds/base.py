@@ -106,6 +106,6 @@ class BaseCRUD(Generic[S_in, S_out]):
 
     @staticmethod
     def convert_id_to_ObjectId(item_id: ItemID) -> ObjectId:
-        if isinstance(item_id, str):
+        if not isinstance(item_id, ObjectId):
             return ObjectId(item_id)
         return item_id
