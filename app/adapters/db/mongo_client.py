@@ -62,7 +62,6 @@ class MongoConnectionPool:
         Использует команду ping для валидации подключения
         """
         try:
-            # Ping с таймаутом
             result = await asyncio.wait_for(
                 self._client.admin.command("ping"), timeout=5.0
             )

@@ -11,30 +11,57 @@ EVENT_TABLE = "events"
 
 
 class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
-    _in_schema = EventCreateSchema
-    _out_schema = Event
+    """EventCRUD."""
+
+    _in = EventCreateSchema
+    _out = Event
     _table = EVENT_TABLE
 
     def __init__(self, db: AsyncDatabase):
         super().__init__(db)
 
     async def get_events_by_type(self, event_type: str) -> list[Event]:
-        """Получить события по типу"""
+        """Получить события по типу.
+
+        Args:
+            event_type (str): event_type
+
+        Returns:
+            list[Event]:
+        """
         return await self.get_all(filters={"event_type": event_type})
 
     async def get_events_by_user(self, user_id: str) -> list[Event]:
-        """Получить события пользователя"""
+        """Получить события пользователя.
+
+        Args:
+            user_id (str): user_id
+
+        Returns:
+            list[Event]:
+        """
         return await self.get_all(filters={"user_id": user_id})
 
     async def get_recent_events(self, hours: int = 24) -> list[Event]:
-        """Получить последние события за указанное количество часов"""
+        """Получить последние события за указанное количество часов.
+
+        Args:
+            hours (int): hours
+
+        Returns:
+            list[Event]:
+        """
         since = datetime.utcnow() - timedelta(hours=hours)
         return await self.get_all(
             filters={"created_at": {"$gte": since}}, sort=[("created_at", -1)]
         )
 
     async def aggregate_events_by_type(self) -> list[dict[str, Any]]:
-        """Агрегация событий по типам"""
+        """Агрегация событий по типам.
+
+        Returns:
+            list[dict[str, Any]]:
+        """
         pipeline = [
             {
                 "$group": {
@@ -50,7 +77,14 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         return await cursor.to_list(length=None)
 
     async def aggregate_daily_statistics(self, days: int = 7) -> list[dict[str, Any]]:
-        """Статистика событий по дням"""
+        """Статистика событий по дням.
+
+        Args:
+            days (int): days
+
+        Returns:
+            list[dict[str, Any]]:
+        """
         since = datetime.utcnow() - timedelta(days=days)
 
         pipeline = [
@@ -73,11 +107,22 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         return await cursor.to_list(length=None)
 
     async def mark_as_processed(self, event_id: str) -> Event | None:
-        """Отметить событие как обработанное"""
+        """Отметить событие как обработанное.
+
+        Args:
+            event_id (str): event_id
+
+        Returns:
+            Event | None:
+        """
         return await self.update(event_id, {"processed": True})
 
     async def get_unprocessed_events(self) -> list[Event]:
-        """Получить необработанные события"""
+        """Получить необработанные события.
+
+        Returns:
+            list[Event]:
+        """
         return await self.get_all(
             filters={"processed": {"$ne": True}}, sort=[("created_at", 1)]
         )

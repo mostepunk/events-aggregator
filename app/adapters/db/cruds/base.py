@@ -7,14 +7,15 @@ from pymongo.results import DeleteResult, InsertOneResult, UpdateResult
 
 from app.adapters.schemas.base import BaseSchema
 from app.entities.base import BaseEntity
+from app.utils.type_hints import ItemID
 
 S_in = TypeVar("S_in", bound=BaseSchema)
 S_out = TypeVar("S_out", bound=BaseEntity)
 
 
 class BaseCRUD(Generic[S_in, S_out]):
-    _in_schema: type[S_in]
-    _out_schema: type[S_out]
+    _in: type[S_in]
+    _out: type[S_out]
     _table: str
 
     def __init__(self, db: AsyncDatabase):
@@ -26,7 +27,7 @@ class BaseCRUD(Generic[S_in, S_out]):
             # TODO: raise exception NotFoundError
             return None
 
-        if isinstance(data, self._in_schema):
+        if isinstance(data, self._in):
             data = data.dict()
 
         item: InsertOneResult = await self.table.insert_one(data)
@@ -36,16 +37,16 @@ class BaseCRUD(Generic[S_in, S_out]):
             # TODO: raise exception DataNotCreated
             raise RuntimeError("Failed to retrieve created document")
 
-        return self._out_schema.from_dict(created_doc)
+        return self._out.from_dict(created_doc)
 
-    async def get_by_id(self, item_id: str | ObjectId) -> S_out:
+    async def get_by_id(self, item_id: ItemID) -> S_out:
         item_id = self.convert_id_to_ObjectId(item_id)
         item = await self.table.find_one({"_id": item_id})
         if not item:
             # TODO: raise exception NotFoundError
             return None
 
-        return self._out_schema.from_dict(item)
+        return self._out.from_dict(item)
 
     async def get_all(
         self,
@@ -65,9 +66,9 @@ class BaseCRUD(Generic[S_in, S_out]):
         else:
             documents = await cursor.to_list(length=limit or None)
 
-        return [self._out_schema.from_dict(doc) for doc in documents]
+        return [self._out.from_dict(doc) for doc in documents]
 
-    async def update(self, item_id: str | ObjectId, data: dict[str, Any]):
+    async def update(self, item_id: ItemID, data: dict[str, Any]) -> S_out:
         item_id = self.convert_id_to_ObjectId(item_id)
         data["updated_at"] = datetime.utcnow()
 
@@ -80,7 +81,7 @@ class BaseCRUD(Generic[S_in, S_out]):
 
         return await self.get_by_id(item_id)
 
-    async def delete(self, item_id: str | ObjectId) -> bool:
+    async def delete(self, item_id: ItemID) -> bool:
         item_id = self.convert_id_to_ObjectId(item_id)
         result: DeleteResult = await self.table.delete_one({"_id": item_id})
         return result.deleted_count > 0
@@ -89,7 +90,7 @@ class BaseCRUD(Generic[S_in, S_out]):
         """Подсчитывает количество документов"""
         return await self.table.count_documents(filters or {})
 
-    async def exists(self, item_id: str | ObjectId) -> bool:
+    async def exists(self, item_id: ItemID) -> bool:
         """Проверяет существование документа"""
         object_id = self.convert_id_to_ObjectId(item_id)
         count = await self.table.count_documents({"_id": object_id}, limit=1)
@@ -104,7 +105,7 @@ class BaseCRUD(Generic[S_in, S_out]):
         return [str(obj_id) for obj_id in result.inserted_ids]
 
     @staticmethod
-    def convert_id_to_ObjectId(item_id):
+    def convert_id_to_ObjectId(item_id: ItemID) -> ObjectId:
         if isinstance(item_id, str):
             return ObjectId(item_id)
         return item_id

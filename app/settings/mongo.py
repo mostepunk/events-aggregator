@@ -17,7 +17,7 @@ class MongoDBSettings(BaseSettings):
 
     max_pool_size: int = 10  # макс к-во соединений в пуле
     min_pool_size: int = 0  # мин к-во соединений (0 = создавать по требованию)
-    max_idle_time_ms: int = 30000  #  время жизни неактивного соединения
+    max_idle_time_ms: int = 30000  # время жизни неактивного соединения
     connect_timeout_ms: int = 10000  # таймаут установки соединения
     server_selection_timeout_ms: int = 5000  # таймаут выбора сервера
     socket_timeout_ms: int = 5000  # таймаут операций чтения/записи

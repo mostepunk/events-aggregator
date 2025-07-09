@@ -5,6 +5,7 @@ from uuid import uuid4
 from app.adapters.db import get_database, init_mongodb
 from app.adapters.db.cruds.event import EventCRUD
 from app.adapters.schemas.events import EventCreateSchema
+from app.services.events_service import EventService
 
 
 def event_data():
@@ -23,19 +24,11 @@ async def main():
     await init_mongodb()
 
     async with get_database() as db:
-        crud = EventCRUD(db)
+        service = EventService(EventCRUD(db))
 
-        # data = event_data()
-        # item = await crud.create(data)
-        # print(item)
-
-        # data = [event_data().dict() for _ in range(10)]
-        # res = await crud.bulk_create(data)
-        # print(f"Created {len(res)} events: {res}")
-
-        items = await crud.get_unprocessed_events()
-        print(f"Found {len(items)} events")
-        pprint(items)
+        data = [event_data().dict() for _ in range(10)]
+        res = await service.create_events(data)
+        pprint(data)
 
 
 asyncio.run(main())
