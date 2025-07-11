@@ -21,6 +21,17 @@ async def get_database():
         raise
 
 
+async def get_database_injection():
+    """Получение соединения для DI."""
+    # это костыль, который уберется в startup
+    await init_mongodb()
+    try:
+        yield mongo_pool.database
+    except Exception as e:
+        logger.error(f"Database operation error: {e}")
+        raise
+
+
 async def init_mongodb() -> None:
     """Инициализация MongoDB при старте приложения"""
     await mongo_pool.connect()
