@@ -23,7 +23,7 @@ async def get_database():
 
 async def get_database_injection():
     """Получение соединения для DI."""
-    # это костыль, который уберется в startup
+    # TODO: костыль, который уедет в startup
     await init_mongodb()
     try:
         yield mongo_pool.database
