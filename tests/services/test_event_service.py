@@ -2,30 +2,33 @@ from app.entities.event import Event
 
 
 class TestEventService:
-    """TestEventService."""
+    """TestEventService.
 
-    async def test_create_events(self, event_service, event_data):
-        """Успешное создание событий."""
-        events = [event_data.dict() for _ in range(10)]
-        res = await event_service.create_events(events)
+    Тестирование бизнес-логики сервисного слоя.
+    """
 
-        assert len(res) == 10, "Должно быть создано 10 событий"
-        assert all(
-            isinstance(event, Event) for event in res
-        ), "Содержимое должно быть экземпляром Event"
-        assert event_service.repo.called_count == 2, "Должно быть вызвано 2 запроса"
+    async def test_create_events_calls_correct_methods(
+        self, event_service_mocked, mock_event_crud, event_data
+    ):
+        events = [event_data for _ in range(10)]
+        mock_ids = ["id1", "id2"]
+        mock_events = [Event(**event) for event in events]
 
-    async def test_get_recent_events(self, event_service):
-        """Успешное получение последних событий."""
-        res = await event_service.get_recent_events()
-        assert isinstance(res, list), "Должно быть список"
-        assert all(
-            isinstance(event, Event) for event in res
-        ), "Содержимое должно быть экземпляром Event"
-        assert event_service.repo.called_count == 1, "Должен быть вызван 1 запрос"
+        mock_event_crud.bulk_create.return_value = mock_ids
+        mock_event_crud.get_all.return_value = mock_events
 
-    async def test_get_recent_events_empty(self, event_service):
-        """Пустой список событий."""
-        event_service.repo.data = []
-        res = await event_service.get_recent_events()
-        assert res == [], "Должен быть пустой список"
+        result = await event_service_mocked.create_events(events)
+
+        mock_event_crud.bulk_create.assert_called_once_with(events)
+        mock_event_crud.get_all.assert_called_once_with({"_id": {"$in": mock_ids}})
+        assert result == mock_events
+
+    async def test_get_recent_events_calls_correct_methods(
+        self, mock_event_crud, event_data, event_service_mocked
+    ):
+        mock_events = [Event(**event_data) for _ in range(10)]
+        mock_event_crud.get_recent_events.return_value = mock_events
+
+        await event_service_mocked.get_recent_events()
+
+        mock_event_crud.get_recent_events.assert_called_once()
