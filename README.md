@@ -1,33 +1,33 @@
-# Проект: "Агрегатор событий и уведомлений" — Витрина навыков MongoDB
+# Events Aggregator — Витрина навыков MongoDB
 
 ## Цели проекта
-- Продемонстрировать глубокое владение MongoDB: моделирование данных, индексация, агрегации, вложенные документы, транзакции, шардинг, TTL, поиск, оптимизация и интеграция с Python/FastAPI.
-- Создать продуктивный pet-проект, полезный для портфолио и демонстрации работодателю.
+- Продемонстрировать глубокое владение MongoDB: моделирование данных, индексация, агрегации, вложенные документы, транзакции, TTL, поиск, оптимизация и интеграция с Python/FastAPI
+- Создать продуктивный pet-проект для портфолио с чистой event-driven архитектурой
+- Реализовать централизованный сервис сбора и анализа событий
 
 ---
 
-## 1. Краткое описание проекта
+## 1. Описание проекта
+**Events Aggregator** — микросервис для централизованного сбора, хранения, анализа и обработки событий от различных источников в распределенной системе.
 
-**"Event & Notification Hub"** — сервис для сбора, хранения, анализа и доставки событий и уведомлений для разных пользователей и приложений.  
-Позволяет:
-- Хранить события разного типа, с разной структурой (гибкая схема).
-- Группировать события, строить агрегаты, сохранять вложенные документы (метаданные, вложенные комментарии).
-- Поддерживать real-time (stream) и отложенные уведомления.
-- Работать с TTL, хранить историю, строить отчёты, искать по тексту.
+### Основные функции:
+- **Сбор событий** из message broker от различных микросервисов
+- **Применение правил** для обработки критичных событий
+- **Аналитика и отчетность** на основе собранных данных
+- **REST API** для просмотра событий и метрик
+- **Real-time мониторинг** через WebSocket/SSE
 
 ---
 
-## 2. Архитектурные особенности, раскрывающие MongoDB
-Основной паттерн будет Event Bus. Основной источник входных данных будет брокер сообщений.
-REST будет использоваться как дополнительный инструмент, для ручного управления событиями.
+## 2. Архитектура системы
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                           EXTERNAL SYSTEMS                                      │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│  │ Web App     │  │ Mobile App  │  │ Payment     │  │ Auth        │             │
-│  │ (Frontend)  │  │ (iOS/Android│  │ Gateway     │  │ Service     │             │
+│  │ Auth        │  │ Payment     │  │ Order       │  │ User        │             │
+│  │ Service     │  │ Service     │  │ Service     │  │ Service     │             │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘             │
 │         │                │                │                │                    │
 │         ▼                ▼                ▼                ▼                    │
@@ -35,39 +35,39 @@ REST будет использоваться как дополнительный
 │  │                 Message Broker                              │                │
 │  │        (Redis Pub/Sub / RabbitMQ / Kafka)                   │                │
 │  │                                                             │                │
-│  │  Topics/Queues:                                             │                │
-│  │  • user.registered    • order.created                       │                │
-│  │  • user.login         • payment.completed                   │                │
-│  │  • user.logout        • error.occurred                      │                │
-│  │  • post.liked         • system.health                       │                │
+│  │  Topics:                                                    │                │
+│  │  • events.user.login      • events.payment.failed           │                │
+│  │  • events.system.error    • events.order.created            │                │
+│  │  • events.notification.delivery                             │                │
 │  └─────────────────────────────────────────────────────────────┘                │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                    EVENT & NOTIFICATION HUB                                     │
+│                          EVENTS AGGREGATOR                                      │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
 │  ┌─────────────────┐                                 ┌─────────────────┐        │
-│  │  Event Consumer │◄────── Message Broker ─────────►│  REST API       │        │
+│  │  Event Consumer │                                 │  REST API       │        │
 │  │                 │                                 │                 │        │
-│  │  • Processes    │                                 │  POST /events   │        │
-│  │    messages     │                                 │  GET  /events   │        │
-│  │  • Bulk writes  │                                 │  GET  /stats    │        │
-│  │  • Error        │                                 │  GET  /stream   │        │
-│  │    handling     │                                 │                 │        │
-│  └─────────────────┘                                 └─────────────────┘        │
-│           │                                                   │                 │
-│           ▼                                                   ▼                 │
+│  │  • Consumes     │                                 │  GET /events    │        │
+│  │    events       │                                 │  GET /analytics │        │
+│  │  • Validates    │                                 │  GET /metrics   │        │
+│  │  • Enriches     │                                 │  GET /rules     │        │
+│  │  • Bulk writes  │                                 │  POST /rules    │        │
+│  └─────────────────┘                                 │  GET /stream    │        │
+│           │                                          └─────────────────┘        │
+│           ▼                                                   │                 │
 │  ┌─────────────────────────────────────────────────────────────────────────────┐│
 │  │                      BUSINESS LOGIC LAYER                                   ││
 │  │                                                                             ││
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         ││
-│  │  │Event Service│  │Notification │  │Analytics    │  │Stream       │         ││
-│  │  │             │  │Service      │  │Service      │  │Service      │         ││
-│  │  │• Validation │  │• Recipients │  │• Aggregation│  │• Change     │         ││
-│  │  │• Enrichment │  │• Templates  │  │• Reports    │  │  Streams    │         ││
-│  │  │• Routing    │  │• Delivery   │  │• Real-time  │  │• SSE/WebSock│         ││
+│  │  │Event        │  │Rules        │  │Analytics    │  │Stream       │         ││
+│  │  │Processor    │  │Engine       │  │Engine       │  │Service      │         ││
+│  │  │             │  │             │  │             │  │             │         ││
+│  │  │• Validation │  │• Rule       │  │• Aggregation│  │• Change     │         ││
+│  │  │• Enrichment │  │  matching   │  │• Reports    │  │  Streams    │         ││
+│  │  │• Storage    │  │• Actions    │  │• Metrics    │  │• WebSocket  │         ││
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘         ││
 │  └─────────────────────────────────────────────────────────────────────────────┘│
 │           │                    │                    │                    │      │
@@ -76,13 +76,13 @@ REST будет использоваться как дополнительный
 │  │                         MONGODB CLUSTER                                     ││
 │  │                                                                             ││
 │  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         ││
-│  │  │   events    │  │notifications│  │    users    │  │    logs     │         ││
+│  │  │   events    │  │    rules    │  │   metrics   │  │    users    │         ││
 │  │  │             │  │             │  │             │  │             │         ││
-│  │  │• Flexible   │  │• Embedded   │  │• Profiles   │  │• Delivery   │         ││
-│  │  │  schema     │  │  recipients │  │• Preferences│  │  tracking   │         ││
-│  │  │• TTL index  │  │• Status     │  │             │  │• TTL        │         ││
-│  │  │• Text search│  │  tracking   │  │             │  │             │         ││
-│  │  │• Compound   │  │             │  │             │  │             │         ││
+│  │  │• Flexible   │  │• Conditions │  │• Aggregated │  │• Minimal    │         ││
+│  │  │  schema     │  │• Actions    │  │  data       │  │  profile    │         ││
+│  │  │• TTL index  │  │• Priorities │  │• Time-based │  │• Preferences│         ││
+│  │  │• Text search│  │             │  │• Cached     │  │             │         ││
+│  │  │• Compound   │  │             │  │  results    │  │             │         ││
 │  │  │  indexes    │  │             │  │             │  │             │         ││
 │  │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘         ││
 │  └─────────────────────────────────────────────────────────────────────────────┘│
@@ -91,111 +91,294 @@ REST будет использоваться как дополнительный
                                      │
                                      ▼
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                          DELIVERY CHANNELS                                      │
+│                            OUTPUT ACTIONS                                       │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐             │
-│  │   Email     │  │    SMS      │  │  Push       │  │ WebSocket   │             │
-│  │  Service    │  │  Gateway    │  │Notifications│  │   Clients   │             │
+│  │Notification │  │   Webhook   │  │   Logging   │  │   Alerting  │             │
+│  │   Queue     │  │  Triggers   │  │  Service    │  │   System    │             │
 │  │             │  │             │  │             │  │             │             │
-│  │• SMTP       │  │• Twilio     │  │• FCM/APNS   │  │• Real-time  │             │
-│  │• Templates  │  │• Bulk send  │  │• Device     │  │  updates    │             │
-│  │• Tracking   │  │             │  │  tokens     │  │• Live       │             │
-│  │             │  │             │  │             │  │  dashboards │             │
+│  │• Critical   │  │• External   │  │• Structured │  │• Monitoring │             │
+│  │  events     │  │  systems    │  │  logs       │  │• Dashboards │             │
+│  │• Retry      │  │• Callbacks  │  │• Audit      │  │• Metrics    │             │
+│  │  logic      │  │             │  │  trail      │  │  export     │             │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘             │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
-### 2.1. Гибкая схема (schema-less)
-- События разных типов (логин, оплата, коммент, лайк, ошибка и т.д.) хранятся в одной коллекции с разной структурой.
-- Использование вложенных документов и массивов (например, список получателей, embedded comments).
-
-### 2.2. Индексация и поиск
-- Составные индексы (`user_id` + `type` + `created_at`).
-- Текстовый поиск (full-text search по сообщениям).
-- Геоиндекс для событий с гео-меткой.
-
-### 2.3. Агрегации и отчёты
-- Использование pipeline-агрегаций для построения статистики: число событий по дням, топ-получатели, активные пользователи.
-- Группировка по типу событий, по времени, по географии.
-
-### 2.4. TTL и автоматическое удаление
-- Включить TTL-индекс для автоудаления устаревших событий/уведомлений.
-
-### 2.5. Транзакции и bulk-операции
-- Использовать bulkWrite для массовой рассылки уведомлений.
-- Демонстрировать multi-document transactions (например, при "атомарной" отправке уведомления и записи логов).
-
-### 2.6. Шардинг (если есть опыт)
-- Показать, как настроить шардинг по user_id или region.
-
-### 2.7. Change Streams (реальное время)
-- Использовать change streams для организации real-time оповещений (pub/sub).
 
 ---
 
-## 3. Примерная структура коллекций
+## 3. Структура данных MongoDB
 
-- `events`: события разной структуры.
-- `notifications`: уведомления пользователям, вложенные статусы доставки.
-- `users`: данные пользователей (можно хранить как embedded documents).
-- `logs`: логи доставки.
+### 3.1 Коллекция `events`
+```javascript
+{
+  "_id": ObjectId,
+  "event_id": "uuid-v4",
+  "type": "USER_LOGIN | PAYMENT_FAILED | SYSTEM_ERROR | ORDER_CREATED",
+  "source": "auth-service",
+  "severity": 1-10,  // 1-3: info, 4-6: warning, 7-8: error, 9-10: critical
+  "timestamp": ISODate,
+  "user_id": "string",
+  "session_id": "string",
+  "trace_id": "string",
+  "payload": {
+    // Гибкая структура в зависимости от типа события
+    "user_email": "user@example.com",
+    "amount": 1000,
+    "currency": "USD",
+    "error_code": "PAYMENT_DECLINED"
+  },
+  "metadata": {
+    "ip_address": "192.168.1.1",
+    "user_agent": "Mozilla/5.0...",
+    "region": "US-EAST-1",
+    "version": "1.0.0"
+  },
+  "processed": true,
+  "created_at": ISODate,
+  "expires_at": ISODate  // TTL
+}
+```
+
+### 3.2 Коллекция `rules`
+```javascript
+{
+  "_id": ObjectId,
+  "name": "Critical Payment Failures",
+  "description": "Notify on multiple payment failures",
+  "conditions": {
+    "type": "PAYMENT_FAILED",
+    "severity": {"$gte": 7},
+    "payload.amount": {"$gte": 1000}
+  },
+  "actions": [
+    {
+      "type": "SEND_NOTIFICATION",
+      "config": {
+        "queue": "notifications.critical",
+        "template": "payment_failure_alert",
+        "recipients": ["admin@company.com"]
+      }
+    },
+    {
+      "type": "WEBHOOK",
+      "config": {
+        "url": "https://monitoring.company.com/webhooks",
+        "method": "POST",
+        "headers": {"Authorization": "Bearer token"}
+      }
+    }
+  ],
+  "priority": 1,
+  "enabled": true,
+  "created_at": ISODate,
+  "updated_at": ISODate
+}
+```
+
+### 3.3 Коллекция `metrics`
+```javascript
+{
+  "_id": ObjectId,
+  "metric_type": "EVENTS_COUNT | ERROR_RATE | RESPONSE_TIME",
+  "dimensions": {
+    "event_type": "PAYMENT_FAILED",
+    "source": "payment-service",
+    "region": "US-EAST-1"
+  },
+  "value": 150,
+  "timestamp": ISODate,
+  "period": "1h",  // 1m, 5m, 1h, 1d
+  "created_at": ISODate,
+  "expires_at": ISODate  // TTL
+}
+```
+
+### 3.4 Коллекция `users`
+```javascript
+{
+  "_id": ObjectId,
+  "user_id": "string",
+  "email": "user@example.com",
+  "name": "John Doe",
+  "role": "admin | user",
+  "preferences": {
+    "notification_channels": ["email", "sms"],
+    "event_types": ["CRITICAL_ERROR", "PAYMENT_FAILED"]
+  },
+  "created_at": ISODate,
+  "updated_at": ISODate
+}
+```
 
 ---
 
-## 4. Базовые и продвинутые CRUD-операции
+## 4. MongoDB возможности в проекте
 
-- Создание/чтение/обновление/удаление событий.
-- Поиск событий по фильтрам, времени, типу, пользователю.
-- Агрегации: топы, распределения, динамика.
-- Bulk-операции и транзакции.
-- TTL для автоудаления.
+### 4.1 Индексы
+```javascript
+// Основные индексы
+db.events.createIndex({ "type": 1, "timestamp": -1, "severity": -1 })
+db.events.createIndex({ "user_id": 1, "timestamp": -1 })
+db.events.createIndex({ "source": 1, "timestamp": -1 })
+db.events.createIndex({ "trace_id": 1 })
+db.events.createIndex({ "expires_at": 1 }, { expireAfterSeconds: 0 })  // TTL
+
+// Текстовый поиск
+db.events.createIndex({ 
+  "payload": "text", 
+  "metadata": "text" 
+})
+
+// Геоиндекс (если нужна геолокация)
+db.events.createIndex({ "metadata.location": "2dsphere" })
+```
+
+### 4.2 Агрегации
+```javascript
+// Пример: события по типам за последние 24 часа
+db.events.aggregate([
+  {
+    $match: {
+      timestamp: { $gte: new Date(Date.now() - 24*60*60*1000) }
+    }
+  },
+  {
+    $group: {
+      _id: "$type",
+      count: { $sum: 1 },
+      avg_severity: { $avg: "$severity" }
+    }
+  },
+  {
+    $sort: { count: -1 }
+  }
+])
+```
+
+### 4.3 Change Streams
+```javascript
+// Мониторинг критичных событий в реальном времени
+db.events.watch([
+  {
+    $match: {
+      "fullDocument.severity": { $gte: 8 }
+    }
+  }
+])
+```
+
+### 4.4 Транзакции
+```javascript
+// Атомарная обработка правила и создание уведомления
+session.withTransaction(async () => {
+  await events.updateOne(
+    { _id: eventId },
+    { $set: { processed: true } }
+  )
+  
+  await notifications.insertOne({
+    event_id: eventId,
+    status: "pending",
+    created_at: new Date()
+  })
+})
+```
 
 ---
 
-## 5. REST API (или GraphQL)
+## 5. REST API
 
-- POST /events — создать событие (динамическое тело).
-- GET /events?type=...&user_id=... — поиск событий.
-- GET /events/aggregate — статистика (динамика, топ).
-- POST /notifications/send — массовая рассылка.
-- GET /notifications/stream — SSE/WebSocket на основе change streams.
-- POST /users — создание пользователя (вложенные профили).
+### 5.1 Events
+- `GET /api/v1/events` - получить события с фильтрацией
+- `GET /api/v1/events/{event_id}` - получить конкретное событие
+- `POST /api/v1/events` - создать событие (для тестирования)
+- `GET /api/v1/events/search` - текстовый поиск по событиям
 
----
+### 5.2 Analytics
+- `GET /api/v1/analytics/summary` - общая статистика
+- `GET /api/v1/analytics/trends` - тренды по времени
+- `GET /api/v1/analytics/top-errors` - топ ошибок
+- `GET /api/v1/analytics/user-activity` - активность пользователей
 
-## 6. UI или Swagger/OpenAPI
+### 5.3 Rules
+- `GET /api/v1/rules` - получить все правила
+- `POST /api/v1/rules` - создать правило
+- `PUT /api/v1/rules/{rule_id}` - обновить правило
+- `DELETE /api/v1/rules/{rule_id}` - удалить правило
 
-- Добавить наглядную документацию (Swagger UI).
-- Можно реализовать простой фронтенд (React/Vue) для live-уведомлений.
-
----
-
-## 7. Инфраструктура
-
-- Docker Compose с MongoDB (с replicaSet для change streams и транзакций).
-- В README.md описать запуск, индексацию, тестовые данные.
-- Скрипты для инициализации и наполнения коллекций.
-
----
-
-## 8. Advanced:  
-- Импорт/экспорт коллекций через mongoimport/mongoexport.
-- Бэкапы, restore, mongodump.
-- Пример миграции схемы.
-- Unit и integration тесты с использованием Testcontainers (pytest + mongodb).
+### 5.4 Real-time
+- `GET /api/v1/stream/events` - SSE поток событий
+- `GET /api/v1/stream/metrics` - SSE поток метрик
+- `WebSocket /ws/events` - WebSocket для real-time обновлений
 
 ---
 
-## 9. Документация
+## 6. Технологический стек
 
-- Объяснить все решения: почему выбрана такая структура, как устроены индексы, примеры запросов, агрегаций.
-- Скриншоты/примеры аналитики, real-time стриминга и TTL-удаления.
+### Backend
+- **Python 3.11+**
+- **FastAPI** - web framework
+- **pymongo** - MongoDB driver
+- **motor** - async MongoDB driver
+- **pydantic** - data validation
+- **celery** - background tasks
+- **redis** - message broker & cache
+
+### Database
+- **MongoDB 6.0+**
+- **Redis 7.0+** - для брокера сообщений
 
 ---
 
-## 10. Что должен увидеть работодатель
+## 7. Запуск проекта
+Work in progress
 
-- Умение проектировать коллекции для document-oriented подхода.
-- Знание индексов, агрегаций, bulk-операций, TTL, транзакций, шардинга.
-- Навыки интеграции с FastAPI, Docker, написания тестов.
-- Документирование и объяснение технических решений.
+---
+
+## 8. Мониторинг и метрики
+
+### 8.1 Healthcheck endpoints
+- `GET /health` - статус сервиса
+- `GET /health/mongodb` - состояние MongoDB
+- `GET /health/redis` - состояние Redis
+
+### 8.2 Prometheus метрики (???)
+- `events_total` - общее количество событий
+- `events_processed_duration` - время обработки
+- `rules_matched_total` - количество сработавших правил
+- `mongodb_operations_total` - операции с БД
+
+---
+
+## 9. Что демонстрирует проект
+
+### MongoDB навыки:
+- ✅ Гибкое моделирование данных (schema-less)
+- ✅ Составные и текстовые индексы
+- ✅ Агрегационные pipeline
+- ✅ TTL для автоматического удаления данных
+- ✅ Change Streams для real-time обновлений
+- ✅ Транзакции для атомарных операций
+- ✅ Bulk операции для производительности
+- ✅ Поиск по тексту и геоданным
+- ✅ Оптимизация запросов
+
+### Архитектурные решения:
+- ✅ Event-driven архитектура
+- ✅ Микросервисная архитектура
+- ✅ Асинхронная обработка
+- ✅ Масштабируемость
+- ✅ Мониторинг и логирование
+
+---
+
+## 10. Дальнейшее развитие
+
+### Возможные улучшения:
+- **Шардинг** MongoDB для горизонтального масштабирования
+- **Machine Learning** для анализа аномалий в событиях
+- **GraphQL** API для более гибких запросов
+- **Kafka** для более надежной обработки событий
+- **Kubernetes** для оркестрации в production

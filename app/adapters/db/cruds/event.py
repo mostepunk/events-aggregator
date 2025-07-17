@@ -6,8 +6,11 @@ from pymongo.asynchronous.database import AsyncDatabase
 from app.adapters.db.cruds.base import BaseCRUD
 from app.adapters.schemas.events import EventCreateSchema
 from app.entities.event import Event
+from app.settings import config
 
 EVENT_TABLE = "events"
+
+logging = config.logging.get_logger("EventCRUD")
 
 
 class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
@@ -52,9 +55,12 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
             list[Event]:
         """
         since = datetime.utcnow() - timedelta(hours=hours)
-        return await self.get_all(
+        # logging.info(f"Get recent events since: {since}")
+        res = await self.get_all(
             filters={"created_at": {"$gte": since}}, sort=[("created_at", -1)]
         )
+        logging.info(f"Got recent events: {len(res)} since: {since}")
+        return res
 
     async def aggregate_events_by_type(self) -> list[dict[str, Any]]:
         """Агрегация событий по типам.

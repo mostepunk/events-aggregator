@@ -116,3 +116,4 @@ known_local_folder = ["app"]
 "BaseSchema" = "from app.adapters.schemas.base import BaseSchema"
 "DBSchemaMixin" = "from app.adapters.schemas.base import DBSchemaMixin"
 "config" = "from app.settings import config"
+"logging" = "logging = config.logging.get_logger(__name__)"

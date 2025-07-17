@@ -1,10 +1,9 @@
-import logging
 from contextlib import asynccontextmanager
 
 from .mongo_client import MongoConnectionPool
 from app.settings import config
 
-logger = logging.getLogger("MongoDB")
+logging = config.logging.get_logger(__name__)
 mongo_pool = MongoConnectionPool()
 
 
@@ -17,7 +16,7 @@ async def get_database():
     try:
         yield mongo_pool.database
     except Exception as e:
-        logger.error(f"Database operation error: {e}")
+        logging.error(f"Database operation error: {e}")
         raise
 
 
@@ -28,7 +27,7 @@ async def get_database_injection():
     try:
         yield mongo_pool.database
     except Exception as e:
-        logger.error(f"Database operation error: {e}")
+        logging.error(f"Database operation error: {e}")
         raise
 
 
