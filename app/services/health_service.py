@@ -10,12 +10,12 @@ class HealthService(BaseService):
         super().__init__(repository)
 
     async def get_health(self):
-        logging.info(
+        logging.debug(
             f"Check connection to MongoDB: {config.mongo.host}, {config.mongo.port}"
         )
         try:
             res = await self.repo.ping()
-            logging.info(f"Health check result: {res}")
+            logging.debug(f"Health check result: {res}")
         except Exception as e:
             logging.warning(f"Health check failed: {e}")
             return False

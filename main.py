@@ -31,12 +31,15 @@ async def check_health(service: EventService = Provide[Container.health_service]
 
 
 @inject
+async def create_events(service: EventService = Provide[Container.event_service]):
+    data = [event_data().dict() for _ in range(10)]
+    await service.create_events(data)
+
+
+@inject
 async def main(service: EventService = Provide[Container.event_service]):
     await check_health()
-    # logging.warning("PING")
-    # logging.warning(f"HELLO MFK")
-    # data = [event_data().dict() for _ in range(10)]
-    # await service.create_events(data)
+    # await create_events()
 
     res = await service.get_recent_events()
     pprint(res)
