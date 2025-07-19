@@ -1,10 +1,10 @@
 from typing import Any
 
+from app import getLogger
 from app.adapters.db.cruds.event import EventCRUD
 from app.services.base import BaseService
-from app.settings import config
 
-logging = config.logging.get_logger("EventService")
+logging = getLogger("EventService")
 
 
 class EventService(BaseService):

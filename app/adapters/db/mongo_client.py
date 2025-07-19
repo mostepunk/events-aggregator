@@ -4,7 +4,10 @@ from typing import Optional
 from pymongo import AsyncMongoClient
 from pymongo.errors import ConnectionFailure, ServerSelectionTimeoutError
 
+from app import getLogger
 from app.settings import config
+
+logging = getLogger("MongoConnectionPool")
 
 
 class MongoConnectionPool:
@@ -23,14 +26,11 @@ class MongoConnectionPool:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
-        self.logger = config.logging.get_logger(f"{self.__class__.__name__}")
-
     async def connect(self) -> None:
         """Устанавливает соединение с MongoDB с настройкой connection pool"""
 
         if self._is_connected:
-            self.logger.warning("Already connected to MongoDB")
+            logging.warning("Already connected to MongoDB")
             return
 
         try:
@@ -42,17 +42,17 @@ class MongoConnectionPool:
             await self._ping_database()
             self._is_connected = True
 
-            self.logger.info(
+            logging.info(
                 f"Successfully connected to MongoDB: {config.mongo.db_name}, "
                 f"Pool size: {config.mongo.min_pool_size}-{config.mongo.max_pool_size}"
             )
 
         except (ConnectionFailure, ServerSelectionTimeoutError) as e:
-            self.logger.exception(f"Failed to connect to MongoDB: {e}")
+            logging.exception(f"Failed to connect to MongoDB: {e}")
             await self.disconnect()
             raise
         except Exception as e:
-            self.logger.exception(f"Unexpected error during MongoDB connection: {e}")
+            logging.exception(f"Unexpected error during MongoDB connection: {e}")
             await self.disconnect()
             raise
 
@@ -85,7 +85,7 @@ class MongoConnectionPool:
         self._client = None
         self._database = None
         self._is_connected = False
-        self.logger.info("Disconnected from MongoDB")
+        logging.info("Disconnected from MongoDB")
 
     @property
     def database(self):
@@ -127,7 +127,7 @@ class MongoConnectionPool:
                 },
             }
         except Exception as e:
-            self.logger.error(f"Failed to get connection stats: {e}")
+            logging.error(f"Failed to get connection stats: {e}")
             return {"status": "error", "error": str(e)}
 
     async def health_check(self) -> bool:
@@ -142,5 +142,5 @@ class MongoConnectionPool:
             await self._ping_database()
             return True
         except Exception as e:
-            self.logger.warning(f"Health check failed: {e}")
+            logging.warning(f"Health check failed: {e}")
             return False

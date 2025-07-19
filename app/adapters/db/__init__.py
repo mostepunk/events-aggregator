@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 
 from .mongo_client import MongoConnectionPool
-from app.settings import config
+from app import getLogger
 
-logging = config.logging.get_logger(__name__)
+logging = getLogger(__name__)
 mongo_pool = MongoConnectionPool()
 
 
@@ -24,6 +24,7 @@ async def get_database_injection():
     """Получение соединения для DI."""
     # TODO: костыль, который уедет в startup
     await init_mongodb()
+    logging.info(f"Get database connection: {mongo_pool.database}")
     try:
         yield mongo_pool.database
     except Exception as e:

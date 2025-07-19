@@ -3,14 +3,13 @@ from typing import Any
 
 from pymongo.asynchronous.database import AsyncDatabase
 
+from app import getLogger
 from app.adapters.db.cruds.base import BaseCRUD
 from app.adapters.schemas.events import EventCreateSchema
 from app.entities.event import Event
-from app.settings import config
 
 EVENT_TABLE = "events"
-
-logging = config.logging.get_logger("EventCRUD")
+logging = getLogger("EventCRUD")
 
 
 class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
