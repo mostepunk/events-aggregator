@@ -11,8 +11,8 @@ from app.utils.enums import EventLevelEnum
 class BaseEventSchema(BaseSchema):
     event_type: str
     event_data: dict[str, Any]
-    user_id: str | None = None
     source: str | None = None
+    user_id: str | None = None  # ???
     level: EventLevelEnum = EventLevelEnum.info
     processed: bool = False
     tags: list[str] = []
