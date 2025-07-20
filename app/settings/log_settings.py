@@ -59,6 +59,9 @@ class LogSettings(BaseSettings):
         logger.info(f"External log level: {config['external_level']}")
         logger.info(f"Log to file: {config['log_to_file']}")
 
+        if config["log_to_file"]:
+            logger.info(f"Log file path: {self.log_file_path}")
+
     def get_logging_config(self) -> dict[str, Any]:
         """Возвращает конфигурацию логирования для текущего окружения.
 
