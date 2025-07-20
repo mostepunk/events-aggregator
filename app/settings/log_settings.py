@@ -1,7 +1,8 @@
 import logging
 import os
 import sys
-from typing import Any
+from logging.handlers import TimedRotatingFileHandler
+from typing import Any, Literal
 
 from pydantic_settings import SettingsConfigDict
 
@@ -23,9 +24,15 @@ class LogSettings(BaseSettings):
     format: str = (
         "[%(asctime)s] %(levelname)-8s | %(name)-20s | %(funcName)s:%(lineno)-8d | %(message)s"
     )
+    show_external: bool | None = None
+    # Files section
     is_log_to_file: bool | None = None
     log_file_path: str | None = None
-    show_external: bool | None = None
+    file_backup_make_when: Literal[
+        "S", "M", "H", "D", "W0", "W1", "W2", "W3", "W4", "W5", "W6", "midnight"
+    ] = "midnight"
+    file_backup_count: int = 7
+    file_format: str | None = None
 
     def setup_logging(self):
         """Основной метод инициализации системы логирования.
@@ -123,11 +130,15 @@ class LogSettings(BaseSettings):
         logger.propagate = False
 
         if config["log_to_file"]:
-            os.makedirs(os.path.dirname(config["log_file"]), exist_ok=True)
+            os.makedirs(os.path.dirname(self.log_file_path), exist_ok=True)
 
-            file_handler = logging.FileHandler(config["log_file"])
+            file_handler = TimedRotatingFileHandler(
+                self.log_file_path,
+                when=self.file_backup_make_when,
+                backupCount=self.file_backup_count,
+            )
             file_handler.setLevel(log_level)
-            file_handler.setFormatter(self.formatter)
+            file_handler.setFormatter(self.file_formatter)
 
             logger.addHandler(file_handler)
 
@@ -201,6 +212,11 @@ class LogSettings(BaseSettings):
     def formatter(self):
         """Единый форматтер для всех хендлеров логгера."""
         return logging.Formatter(self.format)
+
+    @property
+    def file_formatter(self):
+        """Единый форматтер для файловых хендлеров логгера."""
+        return logging.Formatter(self.file_format or self.format)
 
     @property
     def _log_filter(self):
