@@ -11,7 +11,7 @@ from faker import Faker
 fake = Faker()
 
 
-@dataclass
+@dataclass(frozen=True, slots=True)
 class EventTemplate:
     """Шаблон для генерации событий определенного типа"""
 
@@ -751,6 +751,6 @@ def stream_events(time_sleep: float = 1.0) -> Generator[dict, None, None]:
     """
     event_generator = EventDataGenerator()
 
-    for event in event_generator():
-        yield event
+    while True:
+        yield event_generator.generate_event()
         time.sleep(time_sleep)
