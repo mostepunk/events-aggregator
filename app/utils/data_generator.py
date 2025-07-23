@@ -32,14 +32,10 @@ class EventDataGenerator:
 
     # Генерация 100 событий
     generator = EventDataGenerator()
-    events: list[dict] = generator.generate_batch_list(100)
-
-    # Генерация событий каждые 2 секунды
-    for event in generator.generate_stream(interval_seconds=2):
-        print(event)
+    events: list[dict] = list(generator(100))
 
     # Генерация только критичных событий
-    critical_events: list[dict] = generator.generate_batch_list(50, severity_filter=(8, 10))
+    critical_events: list[dict] = list(generator(50, severity_filter=(8, 10)))
     """
 
     def __init__(self, seed: Optional[int] = None):
@@ -583,59 +579,6 @@ class EventDataGenerator:
 
         return event
 
-    def _generate_event(
-        self, severity_filter: Optional[tuple[int, int]] = None
-    ) -> dict:
-        """Генерирует одно случайное событие
-
-        Args:
-            severity_filter: Фильтр по severity (min, max)
-        """
-        # Выбираем шаблон события на основе весов
-        weights = [t.weight for t in self.event_templates]
-        template = random.choices(self.event_templates, weights=weights)[0]
-
-        # Применяем фильтр severity если задан
-        if severity_filter:
-            severity = random.randint(
-                max(template.severity_range[0], severity_filter[0]),
-                min(template.severity_range[1], severity_filter[1]),
-            )
-            # Создаем копию шаблона с новым severity
-            template = EventTemplate(
-                template.event_type,
-                template.source,
-                (severity, severity),
-                template.weight,
-            )
-
-        # Выбираем пользователя (или None для системных событий)
-        user = (
-            self._get_random_user()
-            if template.event_type not in ["SYSTEM_ERROR"]
-            else None
-        )
-
-        # Генерируем событие в зависимости от типа
-        if template.source == "auth-service":
-            return self._generate_auth_event(template, user)
-        elif template.source == "payment-service" and template.event_type.startswith(
-            "PAYMENT"
-        ):
-            return self._generate_payment_event(template, user)
-        elif template.source == "order-service":
-            return self._generate_order_event(template, user)
-        elif template.event_type in ["SYSTEM_ERROR", "RATE_LIMIT_EXCEEDED"]:
-            return self._generate_system_event(template, user)
-        elif template.source == "notification-service":
-            return self._generate_notification_event(template, user)
-        elif template.source == "user-service":
-            return self._generate_user_event(template, user)
-        elif template.source == "analytics-service":
-            return self._generate_analytics_event(template, user)
-        else:
-            return self._generate_base_event(template, user)
-
     # TODO: отрефакторить метод
     def generate_event(self, severity_filter: Optional[tuple[int, int]] = None) -> dict:
         """Генерирует одно случайное событие
@@ -710,7 +653,7 @@ class EventDataGenerator:
         else:
             return self._generate_base_event(template, user)
 
-    def generate_batch(
+    def __call__(
         self, count: int, severity_filter: Optional[tuple[int, int]] = None
     ) -> Generator[dict, None, None]:
         """Генерирует батч событий
@@ -721,32 +664,6 @@ class EventDataGenerator:
         """
         for _ in range(count):
             yield self.generate_event(severity_filter)
-
-    def generate_batch_list(
-        self, count: int, severity_filter: Optional[tuple[int, int]] = None
-    ) -> list[dict]:
-        """Генерирует батч событий
-
-        Args:
-            count: Количество событий
-            severity_filter: Фильтр по severity (min, max)
-        """
-        return list(self.generate_batch(count, severity_filter))
-
-    def generate_stream(
-        self,
-        interval_seconds: float = 1.0,
-        severity_filter: Optional[tuple[int, int]] = None,
-    ) -> Generator[dict, None, None]:
-        """Генерирует бесконечный поток событий
-
-        Args:
-            interval_seconds: Интервал между событиями в секундах
-            severity_filter: Фильтр по severity (min, max)
-        """
-        while True:
-            yield self.generate_event(severity_filter)
-            time.sleep(interval_seconds)
 
     def save_to_file(self, events: list[dict], filename: str, format: str = "json"):
         """Сохраняет события в файл
@@ -805,28 +722,28 @@ def random_event_data(batch_size: int = 100) -> Generator[dict, None, None]:
         batch_size: Количество событий
     """
     envent_generator = EventDataGenerator()
-    for event in envent_generator.generate_batch(batch_size):
+    for event in envent_generator(batch_size):
         yield event
 
 
 # 2. информационные события
-def generate_info_events(batch_size: int = 100) -> list[dict]:
+def generate_info_events(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует информационные события"""
     envent_generator = EventDataGenerator()
-    for event in envent_generator.generate_batch(batch_size, severity_filter=(1, 4)):
+    for event in envent_generator(batch_size, severity_filter=(1, 4)):
         yield event
 
 
 # 3. критические события
-def generate_critical_events(batch_size: int = 100) -> list[dict]:
+def generate_critical_events(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует критические события"""
     envent_generator = EventDataGenerator()
-    for event in envent_generator.generate_batch(batch_size, severity_filter=(7, 10)):
+    for event in envent_generator(batch_size, severity_filter=(7, 10)):
         yield event
 
 
 # 4. поток событий
-def stream_generator(time_sleep: float = 1.0) -> Generator[dict, None, None]:
+def stream_events(time_sleep: float = 1.0) -> Generator[dict, None, None]:
     """Генерирует поток событий
 
     Args:
@@ -834,5 +751,6 @@ def stream_generator(time_sleep: float = 1.0) -> Generator[dict, None, None]:
     """
     event_generator = EventDataGenerator()
 
-    for event in event_generator.generate_stream(interval_seconds=time_sleep):
+    for event in event_generator():
         yield event
+        time.sleep(time_sleep)
