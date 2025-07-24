@@ -41,6 +41,7 @@ class LogSettings(BaseSettings):
         применяет конфигурацию в зависимости от текущего окружения.
         Является точкой входа для всей системы логирования.
         """
+        sys.excepthook = self.handle_uncaught_exception
         config = self.get_logging_config()
 
         root_logger = logging.getLogger()
@@ -242,3 +243,11 @@ class LogSettings(BaseSettings):
                 return record.name.startswith(_app_prefix)
 
         return AppLogFilter()
+
+    def handle_uncaught_exception(self, exc_type, exc_value, exc_traceback):
+
+        app_logger = logging.getLogger(self.app_prefix)
+        app_logger.critical(
+            "Uncaught exception. Application will terminate.",
+            exc_info=(exc_type, exc_value, exc_traceback),
+        )
