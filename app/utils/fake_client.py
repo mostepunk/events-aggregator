@@ -8,7 +8,7 @@ from faker.providers import BaseProvider
 fake = Faker()
 
 
-class ShortIDProvider(BaseProvider):
+class IDProvider(BaseProvider):
     def short_id(self) -> str:
         return fake.uuid4()[:8]
 
@@ -31,13 +31,11 @@ class UserPorvider(BaseProvider):
         }
 
 
-class CategoryProvider(BaseProvider):
+class ProductProvider(BaseProvider):
     def category(self) -> dict:
         """Генерирует список пользователей для использования в событиях"""
         return random.choice(["electronics", "accessories", "clothing", "books"])
 
-
-class ProductNameProvider(BaseProvider):
     def product_name(self) -> dict:
         """Генерирует список пользователей для использования в событиях"""
         return random.choice(
@@ -52,19 +50,15 @@ class ProductNameProvider(BaseProvider):
             ]
         )
 
-
-class ProductProvider(BaseProvider):
     def product(self) -> dict:
         return {
             "id": f"product_{fake.short_id()}",
-            "name": fake.product_name(),
+            "name": self.product_name(),
             "price": fake.random_int(0, 1000),
-            "category": fake.category(),
+            "category": self.category(),
         }
 
 
-fake.add_provider(ShortIDProvider)
+fake.add_provider(IDProvider)
 fake.add_provider(UserPorvider)
-fake.add_provider(CategoryProvider)
-fake.add_provider(ProductNameProvider)
 fake.add_provider(ProductProvider)
