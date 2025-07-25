@@ -7,6 +7,7 @@ from pymongo.results import DeleteResult, InsertOneResult, UpdateResult
 
 from app.adapters.schemas.base import BaseSchema
 from app.entities.base import BaseEntity
+from app.utils.decorators import insert_created_updated
 from app.utils.type_hints import ItemID
 
 S_in = TypeVar("S_in", bound=BaseSchema)
@@ -22,6 +23,7 @@ class BaseCRUD(Generic[S_in, S_out]):
         self.db = db
         self.table = self.db[self._table]
 
+    @insert_created_updated
     async def create(self, data: S_in | dict[str, Any]) -> S_out:
         if not data:
             # TODO: raise exception NotFoundError
@@ -96,6 +98,7 @@ class BaseCRUD(Generic[S_in, S_out]):
         count = await self.table.count_documents({"_id": object_id}, limit=1)
         return count > 0
 
+    @insert_created_updated
     async def bulk_create(self, data_list: List[Dict[str, Any]]) -> List[str]:
         """Массовое создание документов"""
         if not data_list:
@@ -109,3 +112,8 @@ class BaseCRUD(Generic[S_in, S_out]):
         if not isinstance(item_id, ObjectId):
             return ObjectId(item_id)
         return item_id
+
+    def insert_created_updated(self, data: dict[str, Any]):
+        data["updated_at"] = data.get("updated_at", datetime.utcnow())
+        data["created_at"] = data.get("created_at", datetime.utcnow())
+        return data

@@ -54,11 +54,10 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
             list[Event]:
         """
         since = datetime.utcnow() - timedelta(hours=hours)
-        # logging.info(f"Get recent events since: {since}")
         res = await self.get_all(
             filters={"created_at": {"$gte": since}}, sort=[("created_at", -1)]
         )
-        logging.info(f"Got recent events: {len(res)} since: {since}")
+        logging.debug(f"Table: <{self._table}>. Found {len(res)} events since: {since}")
         return res
 
     async def aggregate_events_by_type(self) -> list[dict[str, Any]]:
