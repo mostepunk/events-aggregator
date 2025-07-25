@@ -11,6 +11,10 @@ class EventService(BaseService):
     def __init__(self, repository: EventCRUD):
         super().__init__(repository)
 
+    async def create_event(self, event: dict[str, Any]):
+        logging.debug(f"Start creating event: {event}")
+        return await self.repo.create(event)
+
     async def create_events(self, data_list: list[dict[str, Any]]):
         logging.debug(f"Start creating events: {len(data_list)}")
         ids = await self.repo.bulk_create(data_list)

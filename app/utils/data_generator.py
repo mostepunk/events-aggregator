@@ -76,8 +76,8 @@ class EventDataGenerator:
             "severity": random.randint(*template.severity_range),
             "timestamp": datetime.now(UTC).isoformat() + "Z",
             "user_id": user["user_id"] if user else None,
-            "session_id": f"sess_{fake.uuid4()[:12]}" if user else None,
-            "trace_id": f"trace_{fake.uuid4()[:8]}",
+            "session_id": f"sess_{fake.long_id()}" if user else None,
+            "trace_id": f"trace_{fake.short_id()}",
         }
 
     def _generate_auth_event(self, template: EventTemplate, user: dict) -> dict:
@@ -91,7 +91,7 @@ class EventDataGenerator:
                     ["password", "oauth_google", "oauth_facebook"]
                 ),
                 "remember_me": random.choice([True, False]),
-                "device_fingerprint": f"fp_{fake.uuid4()[:8]}",
+                "device_fingerprint": f"fp_{fake.short_id()}",
                 "two_factor_used": random.choice([True, False]),
             }
 
@@ -150,7 +150,7 @@ class EventDataGenerator:
 
         if template.event_type == "PAYMENT_SUCCESS":
             event["payload"] = {
-                "transaction_id": f"txn_{fake.uuid4()[:12]}",
+                "transaction_id": f"txn_{fake.long_id()}",
                 "order_id": order_id,
                 "amount": amount,
                 "currency": random.choice(["USD", "EUR", "RUB"]),
@@ -160,7 +160,7 @@ class EventDataGenerator:
                 "card_last_four": str(random.randint(1000, 9999)),
                 "card_brand": random.choice(["visa", "mastercard", "amex"]),
                 "processor": random.choice(["stripe", "paypal", "square"]),
-                "processor_transaction_id": f"pi_{fake.uuid4()[:12]}",
+                "processor_transaction_id": f"pi_{fake.long_id()}",
                 "merchant_fee": round(amount * 0.029 + 0.30, 2),
                 "net_amount": round(amount - (amount * 0.029 + 0.30), 2),
                 "processing_time_ms": random.randint(500, 3000),
@@ -168,7 +168,7 @@ class EventDataGenerator:
 
         elif template.event_type == "PAYMENT_FAILED":
             event["payload"] = {
-                "transaction_id": f"txn_failed_{fake.uuid4()[:8]}",
+                "transaction_id": f"txn_failed_{fake.short_id()}",
                 "order_id": order_id,
                 "amount": amount,
                 "currency": "USD",
@@ -192,8 +192,8 @@ class EventDataGenerator:
 
         elif template.event_type == "PAYMENT_REFUNDED":
             event["payload"] = {
-                "refund_id": f"ref_{fake.uuid4()[:12]}",
-                "original_transaction_id": f"txn_{fake.uuid4()[:12]}",
+                "refund_id": f"ref_{fake.long_id()}",
+                "original_transaction_id": f"txn_{fake.long_id()}",
                 "original_order_id": order_id,
                 "refund_amount": amount,
                 "refund_reason": random.choice(
@@ -346,7 +346,7 @@ class EventDataGenerator:
             }
 
         elif template.event_type == "RATE_LIMIT_EXCEEDED":
-            event["user_id"] = user["user_id"] if user else f"user_{fake.uuid4()[:8]}"
+            event["user_id"] = user["user_id"] if user else f"user_{fake.short_id()}"
             event["payload"] = {
                 "endpoint": random.choice(
                     ["/api/v1/orders", "/api/v1/payments", "/api/v1/users"]
@@ -356,7 +356,7 @@ class EventDataGenerator:
                 "time_window": random.choice(["1m", "1h", "1d"]),
                 "current_count": random.randint(150, 2000),
                 "client_ip": fake.ipv4(),
-                "client_id": f"client_{fake.uuid4()[:8]}",
+                "client_id": f"client_{fake.short_id()}",
                 "blocked_duration_seconds": random.choice([60, 300, 3600]),
             }
 
@@ -374,7 +374,7 @@ class EventDataGenerator:
 
         if template.event_type == "NOTIFICATION_DELIVERED":
             event["payload"] = {
-                "notification_id": f"notif_{random.choice(['email', 'sms', 'push'])}_{fake.uuid4()[:8]}",
+                "notification_id": f"notif_{random.choice(['email', 'sms', 'push'])}_{fake.short_id()}",
                 "channel": random.choice(["email", "sms", "push"]),
                 "template": random.choice(
                     [
@@ -391,12 +391,12 @@ class EventDataGenerator:
                 "triggered_by_event": str(uuid.uuid4()),
                 "delivery_time_ms": random.randint(1000, 5000),
                 "provider": random.choice(["sendgrid", "twilio", "firebase"]),
-                "provider_message_id": f"msg_{fake.uuid4()[:12]}",
+                "provider_message_id": f"msg_{fake.long_id()}",
             }
 
         elif template.event_type == "NOTIFICATION_FAILED":
             event["payload"] = {
-                "notification_id": f"notif_{random.choice(['email', 'sms', 'push'])}_{fake.uuid4()[:8]}",
+                "notification_id": f"notif_{random.choice(['email', 'sms', 'push'])}_{fake.short_id()}",
                 "channel": random.choice(["email", "sms", "push"]),
                 "template": random.choice(
                     ["payment_failure_alert", "order_confirmation"]

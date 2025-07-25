@@ -76,23 +76,25 @@ profile = "black"
 known_local_folder = ["app"]
 
 [tool.autoimport.common_statements]
-# standart
+# ================ STANDART ======================
 "UUID" = "from uuid import UUID"
 "uuid4" = "from uuid import uuid4"
 "timedelta" = "from datetime import timedelta"
 "pprint" = "from pprint import pprint"
-# installed libs
-# 
+#
+# ================ INSTALLED LIBS ================
+#
+# === Pydantic ===
 "Field" = "from pydantic import Field"
 "validator" = "from pydantic import validator"
 "root_validator" = "from pydantic import root_validator"
 "parse_obj_as" = "from pydantic import parse_obj_as"
 "TypeAdapter" = "from pydantic import TypeAdapter"
-# 
+# === FastAPI ===
 "APIRouter" = "from fastapi import APIRouter"
 "Depends"= "from fastapi import Depends"
 "HTTPException" = "from fastapi import HTTPException"
-# 
+# === SQLAlchemy ===
 "select" = "from sqlalchemy import select"
 "update" = "from sqlalchemy import update"
 "contains_eager" = "from sqlalchemy.orm import contains_eager"
@@ -111,7 +113,11 @@ known_local_folder = ["app"]
 "Boolean" = "from sqlalchemy import Boolean"
 "or_" = "from sqlalchemy import or_"
 "Text" = "from sqlalchemy import Text"
-# Local Libs
+# === MongoDB ===
+"ObjectId" = "from bson.objectid import ObjectId"
+#
+# ================ LOCAL LIBS ================
+#
 "BaseInsertSchemaMixin" = "from app.adapters.schemas.base import BaseInsertSchemaMixin"
 "BaseSchema" = "from app.adapters.schemas.base import BaseSchema"
 "DBSchemaMixin" = "from app.adapters.schemas.base import DBSchemaMixin"

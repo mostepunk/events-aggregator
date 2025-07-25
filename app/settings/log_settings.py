@@ -41,7 +41,7 @@ class LogSettings(BaseSettings):
         применяет конфигурацию в зависимости от текущего окружения.
         Является точкой входа для всей системы логирования.
         """
-        sys.excepthook = self.handle_uncaught_exception
+        # sys.excepthook = self.handle_uncaught_exception
         config = self.get_logging_config()
 
         root_logger = logging.getLogger()

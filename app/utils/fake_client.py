@@ -1,5 +1,6 @@
 import random
 
+from bson.objectid import ObjectId
 from faker import Faker
 from faker.providers import BaseProvider
 
@@ -10,6 +11,12 @@ fake = Faker()
 class ShortIDProvider(BaseProvider):
     def short_id(self) -> str:
         return fake.uuid4()[:8]
+
+    def long_id(self) -> str:
+        return fake.uuid4()[:12]
+
+    def mongo_id(self) -> ObjectId:
+        return ObjectId()
 
 
 class UserPorvider(BaseProvider):

@@ -24,7 +24,6 @@ async def get_database_injection():
     """Получение соединения для DI."""
     # TODO: костыль, который уедет в startup
     await init_mongodb()
-    logging.info(f"Get database connection: {mongo_pool.database}")
     try:
         yield mongo_pool.database
     except Exception as e:

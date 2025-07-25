@@ -1,17 +1,17 @@
 import asyncio
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock
-from uuid import uuid4
 
 import pytest
 import pytest_asyncio
-from bson.objectid import ObjectId
 
 from tests.fakers.fake_events_crud import FakeEventCRUD
 
 from app.adapters.schemas.events import EventCreateSchema
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
+from app.utils.data_generator import EventDataGenerator, random_event_data
+from app.utils.fake_client import fake
 
 
 @pytest_asyncio.fixture(autouse=True)
@@ -56,18 +56,17 @@ def event_service_fake(fake_event_crud):
 
 
 @pytest.fixture()
+def event_generator():
+    return EventDataGenerator()
+
+
+@pytest.fixture()
 def event_data():
-    return {
-        "_id": ObjectId(),
-        "event_type": "notification",
-        "event_data": {"username": "Pupkin", "redirect_url": "https://example.com"},
-        "user_id": str(uuid4()),
-        "created_at": datetime.utcnow(),
-        "updated_at": datetime.utcnow(),
-        "source": "email",
-        "level": "info",
-        "tags": ["tag1", "tag2"],
-    }
+    event = next(random_event_data(1))
+    event["created_at"] = datetime.now().isoformat()
+    event["updated_at"] = datetime.now().isoformat()
+    event["_id"] = fake.mongo_id()
+    return event
 
 
 @pytest.fixture()
