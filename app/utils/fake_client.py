@@ -1,0 +1,63 @@
+import random
+
+from faker import Faker
+from faker.providers import BaseProvider
+
+# fake = Faker("ru_RU")
+fake = Faker()
+
+
+class ShortIDProvider(BaseProvider):
+    def short_id(self) -> str:
+        return fake.uuid4()[:8]
+
+
+class UserPorvider(BaseProvider):
+    def user(self) -> dict:
+        """Генерирует список пользователей для использования в событиях"""
+        return {
+            "user_id": f"user_{fake.short_id()}",
+            "email": fake.email(),
+            "name": fake.name(),
+            "country": fake.country_code(),
+            "city": fake.city(),
+        }
+
+
+class CategoryProvider(BaseProvider):
+    def category(self) -> dict:
+        """Генерирует список пользователей для использования в событиях"""
+        return random.choice(["electronics", "accessories", "clothing", "books"])
+
+
+class ProductNameProvider(BaseProvider):
+    def product_name(self) -> dict:
+        """Генерирует список пользователей для использования в событиях"""
+        return random.choice(
+            [
+                "Smartphone",
+                "Wireless Headphones",
+                "Phone Case",
+                "Laptop Stand",
+                "Bluetooth Speaker",
+                "USB-C Cable",
+                "Mechanical Keyboard",
+            ]
+        )
+
+
+class ProductProvider(BaseProvider):
+    def product(self) -> dict:
+        return {
+            "id": f"product_{fake.short_id()}",
+            "name": fake.product_name(),
+            "price": fake.random_int(0, 1000),
+            "category": fake.category(),
+        }
+
+
+fake.add_provider(ShortIDProvider)
+fake.add_provider(UserPorvider)
+fake.add_provider(CategoryProvider)
+fake.add_provider(ProductNameProvider)
+fake.add_provider(ProductProvider)

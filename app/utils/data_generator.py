@@ -6,9 +6,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Generator, Optional
 
-from faker import Faker
-
-fake = Faker()
+from app.utils.fake_client import fake
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,11 +41,8 @@ class EventDataGenerator:
             random.seed(seed)
             fake.seed_instance(seed)
 
-        # FIXME: Перенести в faker
-        # Предустановленные пользователи для реалистичности
-        # self.products = [fake.user() for _ in range(50)]
-        self.users = self._generate_users(50)
-
+        self.users = [fake.user() for _ in range(50)]
+        self.products = [fake.product() for _ in range(100)]
         # fmt: off
         # Шаблоны событий с весами (чем больше вес, тем чаще генерируется)
         self.event_templates = [
@@ -67,81 +62,6 @@ class EventDataGenerator:
             EventTemplate("AB_TEST_CONVERSION", "analytics-service", (2, 4), 2.0),
         ]
         # fmt: on
-
-        # FIXME: Перенести в faker
-        # Продукты для заказов
-        # self.products = [fake.product() for _ in range(100)]
-        self.products = [
-            {
-                "id": "prod_000",
-                "name": "Smartphone",
-                "price": 999.99,
-                "category": "electronics",
-            },
-            {
-                "id": "prod_001",
-                "name": "Wireless Headphones",
-                "price": 79.99,
-                "category": "electronics",
-            },
-            {
-                "id": "prod_002",
-                "name": "Phone Case",
-                "price": 19.99,
-                "category": "accessories",
-            },
-            {
-                "id": "prod_003",
-                "name": "Laptop Stand",
-                "price": 45.00,
-                "category": "accessories",
-            },
-            {
-                "id": "prod_004",
-                "name": "Bluetooth Speaker",
-                "price": 129.99,
-                "category": "electronics",
-            },
-            {
-                "id": "prod_005",
-                "name": "USB-C Cable",
-                "price": 12.99,
-                "category": "accessories",
-            },
-            {
-                "id": "prod_006",
-                "name": "Mechanical Keyboard",
-                "price": 199.99,
-                "category": "electronics",
-            },
-            {
-                "id": "prod_007",
-                "name": "Webcam HD",
-                "price": 89.99,
-                "category": "electronics",
-            },
-            {
-                "id": "prod_008",
-                "name": "Mouse Pad",
-                "price": 24.99,
-                "category": "accessories",
-            },
-        ]
-
-    def _generate_users(self, count: int) -> list[dict]:
-        """Генерирует список пользователей для использования в событиях"""
-        users = []
-        for _ in range(count):
-            users.append(
-                {
-                    "user_id": f"user_{fake.uuid4()[:8]}",
-                    "email": fake.email(),
-                    "name": fake.name(),
-                    "country": fake.country_code(),
-                    "city": fake.city(),
-                }
-            )
-        return users
 
     def _get_random_user(self) -> dict:
         """Возвращает случайного пользователя"""
@@ -721,36 +641,44 @@ def random_event_data(batch_size: int = 100) -> Generator[dict, None, None]:
     Args:
         batch_size: Количество событий
     """
-    envent_generator = EventDataGenerator()
-    for event in envent_generator(batch_size):
+    event_generator = EventDataGenerator()
+    for event in event_generator(batch_size):
         yield event
 
 
 # 2. информационные события
 def generate_info_events(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует информационные события"""
-    envent_generator = EventDataGenerator()
-    for event in envent_generator(batch_size, severity_filter=(1, 4)):
+    event_generator = EventDataGenerator()
+    for event in event_generator(batch_size, severity_filter=(1, 4)):
         yield event
 
 
 # 3. критические события
 def generate_critical_events(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует критические события"""
-    envent_generator = EventDataGenerator()
-    for event in envent_generator(batch_size, severity_filter=(7, 10)):
+    event_generator = EventDataGenerator()
+    for event in event_generator(batch_size, severity_filter=(7, 10)):
         yield event
 
 
 # 4. поток событий
-def stream_events(time_sleep: float = 1.0) -> Generator[dict, None, None]:
+def stream_events(
+    time_sleep: float = 1.0, max_events: int = 1000
+) -> Generator[dict, None, None]:
     """Генерирует поток событий
 
     Args:
         time_sleep: Интервал между событиями
+        max_events: Максимальное количество событий
     """
     event_generator = EventDataGenerator()
+    count = 0
 
-    while True:
-        yield event_generator.generate_event()
-        time.sleep(time_sleep)
+    try:
+        while max_events > count:
+            count += 1
+            yield event_generator.generate_event()
+            time.sleep(time_sleep)
+    except KeyboardInterrupt:
+        print(f"\n Остановлено пользователем. Сгенерировано событий: {count}")
