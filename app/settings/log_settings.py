@@ -9,6 +9,19 @@ from pydantic_settings import SettingsConfigDict
 from app.settings.base import BaseSettings
 from app.utils.enums import EnvironmentEnum, LogLevelEnum
 
+EXTERNAL_LOGGERS = [
+    "urllib3",
+    "requests",
+    "httpx",
+    "pymongo",
+    "motor",
+    "asyncio",
+    "multipart",
+    "uvicorn",
+    "uvicorn.access",
+    "fastapi",
+]
+
 
 class LogSettings(BaseSettings):
     """Конфигурация логирования приложения с поддержкой различных окружений.
@@ -163,20 +176,7 @@ class LogSettings(BaseSettings):
             Список библиотек можно расширять по мере добавления новых зависимостей
         """
 
-        external_loggers = [
-            "urllib3",
-            "requests",
-            "httpx",
-            "pymongo",
-            "motor",
-            "uvicorn",
-            "uvicorn.access",
-            "fastapi",
-            "asyncio",
-            "multipart",
-        ]
-
-        for logger_name in external_loggers:
+        for logger_name in EXTERNAL_LOGGERS:
             logger = logging.getLogger(logger_name)
             self.setup_logger(logger, external_log_level)
 

@@ -11,6 +11,9 @@ class BaseEntity:
     created_at: datetime
     updated_at: datetime
 
+    def __post_init__(self):
+        self._id = str(self._id)
+
     @classmethod
     def from_dict(cls, data):
         """Convert data from a dictionary"""

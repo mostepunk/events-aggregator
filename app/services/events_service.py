@@ -22,7 +22,7 @@ class EventService(BaseService):
         logging.debug(f"Created events: {len(ids)}")
         return await self.repo.get_all({"_id": {"$in": ids}})
 
-    async def get_recent_events(self):
-        res = await self.repo.get_recent_events()
+    async def get_recent_events(self, hours: int = 24):
+        res = await self.repo.get_recent_events(hours)
         logging.debug(f"Got recent events: {len(res)}")
-        return res
+        return [event.to_dict() for event in res]
