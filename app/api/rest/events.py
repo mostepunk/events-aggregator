@@ -21,4 +21,4 @@ async def gen_events(
     service: EventService = Depends(Container.event_service),
 ):
     events = list(random_event_data(event_count))
-    await service.create_events(events)
+    return await service.create_events(events)

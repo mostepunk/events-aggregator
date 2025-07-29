@@ -20,7 +20,8 @@ class EventService(BaseService):
         ids = await self.repo.bulk_create(data_list)
         ids = list(map(self.repo.convert_id_to_ObjectId, ids))
         logging.debug(f"Created events: {len(ids)}")
-        return await self.repo.get_all({"_id": {"$in": ids}})
+        res = await self.repo.get_all({"_id": {"$in": ids}})
+        return [event.to_dict() for event in res]
 
     async def get_recent_events(self, hours: int = 24):
         res = await self.repo.get_recent_events(hours)
