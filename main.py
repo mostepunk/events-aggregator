@@ -1,12 +1,13 @@
-import asyncio
 from pprint import pprint
 
+import uvicorn
 from that_depends import Provide, inject
 
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
 from app.settings import config
 from app.utils.data_generator import random_event_data
+
 
 config.logging.setup_logging()
 logging = config.logging.get_logger(__name__)
@@ -35,4 +36,9 @@ async def main(service: EventService = Provide[Container.event_service]):
     pprint(f"Found {len(res)} recent events")
 
 
-asyncio.run(main())
+def start_server():
+    uvicorn.run("app.engine.web_app:fastapi_app", **config.app.server_settings)
+
+
+if __name__ == "__main__":
+    start_server()

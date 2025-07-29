@@ -1,3 +1,4 @@
+from .app_settings import AppSettings
 from .base import BaseSettings
 from .log_settings import LogSettings
 from .mongo import MongoDBSettings
@@ -6,6 +7,7 @@ from .mongo import MongoDBSettings
 class Config(BaseSettings):
     mongo: MongoDBSettings = MongoDBSettings()
     logging: LogSettings = LogSettings()
+    app: AppSettings = AppSettings()
 
 
 config = Config()

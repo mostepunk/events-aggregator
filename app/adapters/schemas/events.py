@@ -2,20 +2,22 @@
 события разной структуры.
 """
 
-from typing import Any
+from datetime import datetime
 
 from app.adapters.schemas.base import BaseInsertSchemaMixin, BaseSchema, DBSchemaMixin
-from app.utils.enums import EventLevelEnum
 
 
 class BaseEventSchema(BaseSchema):
-    event_type: str
-    event_data: dict[str, Any]
-    source: str | None = None
-    user_id: str | None = None  # ???
-    level: EventLevelEnum = EventLevelEnum.info
-    processed: bool = False
-    tags: list[str] = []
+    event_id: str
+    type: str
+    source: str
+    severity: int
+    timestamp: datetime
+    user_id: str | None = None
+    session_id: str | None = None
+    trace_id: str | None = None
+    payload: dict | None = None
+    metadata: dict | None = None
 
 
 class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
