@@ -10,7 +10,7 @@ class HealthService(BaseService):
     def __init__(self, repository: HealthCRUD):
         super().__init__(repository)
 
-    async def get_health(self):
+    async def is_ok(self) -> bool:
         logging.debug(
             f"Check connection to MongoDB: {config.mongo.host}, {config.mongo.port}"
         )
