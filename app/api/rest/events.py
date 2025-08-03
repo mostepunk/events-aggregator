@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
-from app.utils.data_generator import random_event_data
+from app.utils.data_generator import random_event_generator
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
@@ -20,5 +20,6 @@ async def gen_events(
     event_count: int = 10,
     service: EventService = Depends(Container.event_service),
 ):
-    events = list(random_event_data(event_count))
+    events = list(random_event_generator(event_count))
     return await service.create_events(events)
+

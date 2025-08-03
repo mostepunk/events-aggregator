@@ -1,13 +1,8 @@
-"""
-уведомления пользователям, вложенные статусы доставки.
-"""
-
-from app.adapters.schemas.base import BaseInsertSchemaMixin, BaseSchema
+from app.adapters.schemas.base import BaseSchema
+from app.utils.enums import NotificationTypeEnum
 
 
-class BaseNotificationSchema(BaseSchema):
-    pass
-
-
-class NotificationCreateSchema(BaseInsertSchemaMixin, BaseNotificationSchema):
-    pass
+class NotificationSchema(BaseSchema):
+    type: NotificationTypeEnum = NotificationTypeEnum.email
+    message: str
+    params: dict

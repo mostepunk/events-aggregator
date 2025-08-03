@@ -10,7 +10,7 @@ from tests.fakers.fake_events_crud import FakeEventCRUD
 from app.adapters.schemas.events import EventCreateSchema
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
-from app.utils.data_generator import EventDataGenerator, random_event_data
+from app.utils.data_generator import EventDataGenerator, random_event_generator
 from app.utils.fake_client import fake
 
 
@@ -57,12 +57,12 @@ def event_service_fake(fake_event_crud):
 
 @pytest.fixture()
 def event_generator():
-    return EventDataGenerator()
+    return EventDataGenerator(seed=42)
 
 
 @pytest.fixture()
 def event_data():
-    event = next(random_event_data(1))
+    event = next(random_event_generator(1))
     event["created_at"] = datetime.now().isoformat()
     event["updated_at"] = datetime.now().isoformat()
     event["_id"] = fake.mongo_id()

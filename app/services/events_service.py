@@ -12,7 +12,7 @@ class EventService(BaseService):
         super().__init__(repository)
 
     async def create_event(self, event: dict[str, Any]):
-        logging.debug(f"Start creating event: {event}")
+        logging.debug(f"Start creating event. Type: {event.get('type')}")
         return await self.repo.create(event)
 
     async def create_events(self, data_list: list[dict[str, Any]]):

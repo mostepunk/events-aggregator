@@ -74,7 +74,7 @@ class EventDataGenerator:
             "type": template.event_type,
             "source": template.source,
             "severity": random.randint(*template.severity_range),
-            "timestamp": datetime.now(UTC).isoformat() + "Z",
+            "timestamp": datetime.now(UTC).isoformat(),
             "user_id": user["user_id"] if user else None,
             "session_id": f"sess_{fake.long_id()}" if user else None,
             "trace_id": f"trace_{fake.short_id()}",
@@ -635,7 +635,7 @@ class EventDataGenerator:
 
 # Usecases:
 # 1. рандомные события
-def random_event_data(batch_size: int = 100) -> Generator[dict, None, None]:
+def random_event_generator(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует события
 
     Args:
@@ -647,7 +647,7 @@ def random_event_data(batch_size: int = 100) -> Generator[dict, None, None]:
 
 
 # 2. информационные события
-def generate_info_events(batch_size: int = 100) -> Generator[dict, None, None]:
+def info_event_generator(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует информационные события"""
     event_generator = EventDataGenerator()
     for event in event_generator(batch_size, severity_filter=(1, 4)):
@@ -655,7 +655,7 @@ def generate_info_events(batch_size: int = 100) -> Generator[dict, None, None]:
 
 
 # 3. критические события
-def generate_critical_events(batch_size: int = 100) -> Generator[dict, None, None]:
+def critical_event_generator(batch_size: int = 100) -> Generator[dict, None, None]:
     """Генерирует критические события"""
     event_generator = EventDataGenerator()
     for event in event_generator(batch_size, severity_filter=(7, 10)):
@@ -663,7 +663,7 @@ def generate_critical_events(batch_size: int = 100) -> Generator[dict, None, Non
 
 
 # 4. поток событий
-def stream_events(
+def event_streamer(
     time_sleep: float = 1.0, max_events: int = 1000
 ) -> Generator[dict, None, None]:
     """Генерирует поток событий

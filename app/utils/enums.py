@@ -24,3 +24,14 @@ class LogLevelEnum(StrEnum):
     warning = "WARNING", "предупреждение"
     error = "ERROR", "ошибка"
     critical = "CRITICAL", "критическая"
+
+
+class BrokerTypeEnum(StrEnum):
+    redis = "redis", "Redis"
+    kafka = "kafka", "Kafka"
+    rabbit = "rabbit", "Rabbit MQ"
+
+
+class NotificationTypeEnum(StrEnum):
+    email = "email", "Email"
+    sms = "sms", "SMS"
