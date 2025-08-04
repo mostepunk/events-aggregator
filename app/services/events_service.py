@@ -27,3 +27,6 @@ class EventService(BaseService):
         res = await self.repo.get_recent_events(hours)
         logging.debug(f"Got recent events: {len(res)}")
         return [event.to_dict() for event in res]
+
+    async def get_event_types(self):
+        return await self.repo.get_event_types()

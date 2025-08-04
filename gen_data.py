@@ -11,8 +11,15 @@ async def main():
     await broker.connect()
 
     for event in event_streamer():
+        print(
+            f"Создано событие. Тип: {event.get('type')}. "
+            f"Критичность: {event.get('severity')}"
+        )
         await broker.publish(event, "events-channel")
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print(f"\n Остановлено пользователем")

@@ -45,7 +45,3 @@ class BrokerSettings(BaseSettings):
     def router_instance(self):
         if self.type == BrokerTypeEnum.redis:
             return RedisRouter(self.uri.get_secret_value())
-
-    def broker_instance(self):
-        if self.type == BrokerTypeEnum.redis:
-            return RedisBroker(self.uri.get_secret_value())

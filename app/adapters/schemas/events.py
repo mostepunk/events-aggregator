@@ -4,6 +4,8 @@
 
 from datetime import datetime
 
+from pydantic import Field
+
 from app.adapters.schemas.base import BaseInsertSchemaMixin, BaseSchema, DBSchemaMixin
 
 
@@ -26,3 +28,10 @@ class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
 
 class EventDBSchema(DBSchemaMixin, BaseEventSchema):
     pass
+
+
+class EventsCharacteristicsSchema(BaseSchema):
+    event_count: int = Field(10, gt=0, example=10, description="Количество событий")
+    is_criticals: bool = Field(
+        False, example=False, description="Генерация критичных событий"
+    )

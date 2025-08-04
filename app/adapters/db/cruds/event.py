@@ -130,3 +130,12 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         return await self.get_all(
             filters={"processed": {"$ne": True}}, sort=[("created_at", 1)]
         )
+
+    async def get_event_types(self) -> list[str]:
+        """Получить типы событий.
+
+        Returns:
+            list[str]:
+        """
+        res = await self.table.find({}, {"type": 1, "_id": 0}).distinct("type")
+        return res
