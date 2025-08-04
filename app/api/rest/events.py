@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
-from app.adapters.schemas.events import EventsCharacteristicsSchema
+from app.adapters.schemas.events import EventsCharacteristicsSchema, EventsFilterSchema
+from app.adapters.schemas.pagination import PaginationSchema
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
 from app.utils.data_generator import critical_event_generator, random_event_generator
@@ -10,10 +11,14 @@ router = APIRouter(prefix="/events", tags=["Events"])
 
 @router.get("/")
 async def get_events(
-    hours: int = 24,
+    filter: EventsFilterSchema = Depends(),
+    pagination: PaginationSchema = Depends(),
     service: EventService = Depends(Container.event_service),
 ):
-    return await service.get_recent_events(hours)
+    return await service.get_events_list(
+        filter.dict(exclude_unset=True),
+        pagination.dict(exclude_unset=True),
+    )
 
 
 @router.get("/types/")

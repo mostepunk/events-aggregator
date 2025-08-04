@@ -5,10 +5,14 @@ from bson.objectid import ObjectId
 from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.results import DeleteResult, InsertOneResult, UpdateResult
 
+from app import getLogger
 from app.adapters.schemas.base import BaseSchema
 from app.entities.base import BaseEntity
 from app.utils.decorators import insert_created_updated
 from app.utils.type_hints import ItemID
+
+logging = getLogger(__name__)
+
 
 S_in = TypeVar("S_in", bound=BaseSchema)
 S_out = TypeVar("S_out", bound=BaseEntity)
@@ -63,6 +67,8 @@ class BaseCRUD(Generic[S_in, S_out]):
             cursor = cursor.sort(sort)
 
         if limit is not None and offset is not None:
+            # оффсет начинается с 1 (первая страница на вебе)
+            offset -= 1
             cursor = cursor.skip(offset).limit(limit)
             documents = await cursor.to_list(length=limit)
         else:

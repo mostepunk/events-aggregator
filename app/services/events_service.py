@@ -30,3 +30,13 @@ class EventService(BaseService):
 
     async def get_event_types(self):
         return await self.repo.get_event_types()
+
+    async def get_events_by_type(self, event_type: str):
+        return await self.repo.get_events_by_type(event_type)
+
+    async def get_events_list(
+        self,
+        filter: dict[str, Any],
+        pagination: dict[str, Any],
+    ):
+        return await self.repo.get_filtered_events(filter, pagination)

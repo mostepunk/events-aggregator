@@ -35,3 +35,10 @@ class EventsCharacteristicsSchema(BaseSchema):
     is_criticals: bool = Field(
         False, example=False, description="Генерация критичных событий"
     )
+
+
+class EventsFilterSchema(BaseSchema):
+    event_type: str | None = None
+    hours: int | None = Field(None, gt=0, example=24, description="Период по часам")
+    sort_field: str | None = "created_at"
+    sort_order: int | None = -1

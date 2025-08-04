@@ -139,3 +139,33 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         """
         res = await self.table.find({}, {"type": 1, "_id": 0}).distinct("type")
         return res
+
+    async def get_filtered_events(
+        self, filter: dict[str, Any], pagination: dict[str, int | None]
+    ) -> list[Event]:
+        logging.debug(f"Incoming filter: {filter}")
+        mongo_filter = {}
+
+        sort_field = filter.pop("sort_field", "created_at")
+        sort_order = filter.pop("sort_order", -1)
+        sort = [(sort_field, sort_order)]
+
+        if event_type := filter.get("event_type"):
+            event_type = event_type.split(",")
+            mongo_filter["type"] = {"$in": event_type}
+
+        if filter.get("hours"):
+            since = datetime.utcnow() - timedelta(hours=filter["hours"])
+            mongo_filter["created_at"] = {"$gte": since}
+
+        logging.debug(
+            f"Table: <{self._table}>. Filters: {mongo_filter} Sorting: {sort}"
+        )
+        res = await self.get_all(
+            filters=mongo_filter,
+            sort=sort,
+            **pagination,
+        )
+        logging.debug(f"Found {len(res)} events")
+
+        return res
