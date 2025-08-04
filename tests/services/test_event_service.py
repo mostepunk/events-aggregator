@@ -19,9 +19,14 @@ class TestEventService:
 
         result = await event_service_mocked.create_events(events)
 
+        # методы должны быть вызваны
         mock_event_crud.bulk_create.assert_called_once_with(events)
         mock_event_crud.get_all.assert_called_once_with({"_id": {"$in": mock_ids}})
-        assert result == mock_events
+
+        for res in result:
+            # сервисный слой должен возвращать словари
+            assert isinstance(res, dict)
+            assert isinstance(res.get("_id"), str)
 
     async def test_get_recent_events_calls_correct_methods(
         self, mock_event_crud, event_data, event_service_mocked

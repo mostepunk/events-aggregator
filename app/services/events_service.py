@@ -16,7 +16,7 @@ class EventService(BaseService):
         return await self.repo.create(event)
 
     async def create_events(self, data_list: list[dict[str, Any]]):
-        logging.debug(f"Start creating events: {len(data_list)}")
+        logging.debug(f"Start creating {len(data_list)} events")
         ids = await self.repo.bulk_create(data_list)
         ids = list(map(self.repo.convert_id_to_ObjectId, ids))
         logging.debug(f"Created events: {len(ids)}")
