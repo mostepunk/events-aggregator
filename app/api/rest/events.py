@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Depends
 
-from app.adapters.schemas.events import EventsCharacteristicsSchema, EventsFilterSchema
+from app.adapters.schemas.events import (
+    EventsCharacteristicsSchema,
+    EventSchema,
+    EventsFilterSchema,
+    GeneratedEventsSchema,
+)
 from app.adapters.schemas.pagination import PaginationSchema
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
@@ -9,7 +14,7 @@ from app.utils.data_generator import critical_event_generator, random_event_gene
 router = APIRouter(prefix="/events", tags=["Events"])
 
 
-@router.get("/")
+@router.get("/", response_model=list[EventSchema])
 async def get_events(
     filter: EventsFilterSchema = Depends(),
     pagination: PaginationSchema = Depends(),
@@ -21,14 +26,14 @@ async def get_events(
     )
 
 
-@router.get("/types/")
+@router.get("/types/", response_model=list[str])
 async def get_event_types(
     service: EventService = Depends(Container.event_service),
 ):
     return await service.get_event_types()
 
 
-@router.post("/gen-test-data/")
+@router.post("/gen-test-data/", response_model=GeneratedEventsSchema)
 async def gen_events(
     event_characteristics: EventsCharacteristicsSchema,
     service: EventService = Depends(Container.event_service),
@@ -38,4 +43,9 @@ async def gen_events(
     else:
         events = list(random_event_generator(event_characteristics.event_count))
 
-    return await service.create_events(events)
+    res = await service.create_events(events)
+    return {
+        "created_events": event_characteristics,
+        "created": len(res),
+        "success": True,
+    }

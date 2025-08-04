@@ -154,8 +154,8 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
             event_type = event_type.split(",")
             mongo_filter["type"] = {"$in": event_type}
 
-        if filter.get("hours"):
-            since = datetime.utcnow() - timedelta(hours=filter["hours"])
+        if hours := filter.get("hours"):
+            since = datetime.utcnow() - timedelta(hours=hours)
             mongo_filter["created_at"] = {"$gte": since}
 
         logging.debug(

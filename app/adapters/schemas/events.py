@@ -26,7 +26,7 @@ class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
     pass
 
 
-class EventDBSchema(DBSchemaMixin, BaseEventSchema):
+class EventSchema(DBSchemaMixin, BaseEventSchema):
     pass
 
 
@@ -42,3 +42,9 @@ class EventsFilterSchema(BaseSchema):
     hours: int | None = Field(None, gt=0, example=24, description="Период по часам")
     sort_field: str | None = "created_at"
     sort_order: int | None = -1
+
+
+class GeneratedEventsSchema(BaseSchema):
+    created_events: EventsCharacteristicsSchema
+    created: int
+    success: bool
