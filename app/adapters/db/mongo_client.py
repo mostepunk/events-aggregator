@@ -79,7 +79,7 @@ class MongoConnectionPool:
         Должен вызываться при завершении приложения
         """
         if self._client:
-            self._client.close()
+            await self._client.close()
             await asyncio.sleep(0.1)
 
         self._client = None

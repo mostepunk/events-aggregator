@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 
+from app import getLogger
 from app.adapters.schemas.events import (
     EventsCharacteristicsSchema,
     EventSchema,
@@ -10,6 +11,9 @@ from app.adapters.schemas.pagination import PaginationSchema
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
 from app.utils.data_generator import critical_event_generator, random_event_generator
+
+logging = getLogger(__name__)
+
 
 router = APIRouter(prefix="/events", tags=["Events"])
 
@@ -31,6 +35,13 @@ async def get_event_types(
     service: EventService = Depends(Container.event_service),
 ):
     return await service.get_event_types()
+
+
+@router.get("/sources/", response_model=list[str])
+async def get_event_sources(
+    service: EventService = Depends(Container.event_service),
+):
+    return await service.get_event_sources()
 
 
 @router.post("/gen-test-data/", response_model=GeneratedEventsSchema)

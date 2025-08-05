@@ -7,6 +7,7 @@ from app import getLogger
 from app.adapters.db.cruds.base import BaseCRUD
 from app.adapters.schemas.events import EventCreateSchema
 from app.entities.event import Event
+from app.utils.enums import PirorityLevelEnum
 
 EVENT_TABLE = "events"
 logging = getLogger("EventCRUD")
@@ -140,6 +141,15 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         res = await self.table.find({}, {"type": 1, "_id": 0}).distinct("type")
         return res
 
+    async def get_event_sources(self) -> list[str]:
+        """Получить типы событий.
+
+        Returns:
+            list[str]:
+        """
+        res = await self.table.find({}, {"source": 1, "_id": 0}).distinct("source")
+        return res
+
     async def get_filtered_events(
         self, filter: dict[str, Any], pagination: dict[str, int | None]
     ) -> list[Event]:
@@ -151,12 +161,24 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         sort = [(sort_field, sort_order)]
 
         if event_type := filter.get("event_type"):
-            event_type = event_type.split(",")
-            mongo_filter["type"] = {"$in": event_type}
+            mongo_filter["type"] = {"$in": event_type.split(",")}
+
+        if source := filter.get("source"):
+            mongo_filter["source"] = {"$in": source.split(",")}
 
         if hours := filter.get("hours"):
             since = datetime.utcnow() - timedelta(hours=hours)
             mongo_filter["created_at"] = {"$gte": since}
+
+        if priority := filter.get("priority"):
+            if priority == PirorityLevelEnum.low:
+                mongo_filter["severity"] = {"$lte": 3}
+
+            elif priority == PirorityLevelEnum.medium:
+                mongo_filter["severity"] = {"$gte": 4, "$lte": 6}
+
+            elif priority == PirorityLevelEnum.high:
+                mongo_filter["severity"] = {"$gte": 7}
 
         logging.debug(
             f"Table: <{self._table}>. Filters: {mongo_filter} Sorting: {sort}"

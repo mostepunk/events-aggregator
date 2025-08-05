@@ -7,6 +7,7 @@ from datetime import datetime
 from pydantic import Field
 
 from app.adapters.schemas.base import BaseInsertSchemaMixin, BaseSchema, DBSchemaMixin
+from app.utils.enums import PirorityLevelEnum
 
 
 class BaseEventSchema(BaseSchema):
@@ -39,7 +40,18 @@ class EventsCharacteristicsSchema(BaseSchema):
 
 class EventsFilterSchema(BaseSchema):
     event_type: str | None = None
-    hours: int | None = Field(None, gt=0, example=24, description="Период по часам")
+    hours: int | None = Field(
+        None,
+        gt=0,
+        example=24,
+        description="Период по часам",
+    )
+    source: str | None = Field(
+        None,
+        example="auth-service",
+        description="Источник событий",
+    )
+    priority: PirorityLevelEnum | None = None
     sort_field: str | None = "created_at"
     sort_order: int | None = -1
 

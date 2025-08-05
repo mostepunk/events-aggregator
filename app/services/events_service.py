@@ -31,6 +31,9 @@ class EventService(BaseService):
     async def get_event_types(self):
         return await self.repo.get_event_types()
 
+    async def get_event_sources(self):
+        return await self.repo.get_event_sources()
+
     async def get_events_by_type(self, event_type: str):
         return await self.repo.get_events_by_type(event_type)
 

@@ -35,3 +35,9 @@ class BrokerTypeEnum(StrEnum):
 class NotificationTypeEnum(StrEnum):
     email = "email", "Email"
     sms = "sms", "SMS"
+
+
+class PirorityLevelEnum(StrEnum):
+    low = "low", "Низкий"
+    medium = "medium", "Средний"
+    high = "high", "Высокий"

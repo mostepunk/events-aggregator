@@ -3,6 +3,7 @@ from enum import Enum
 
 class StrEnum(str, Enum):
     """Parent Custom Enum Str
+
     В стандартном енуме сравнивается конечное значение, после =
     Но нам надо, чтобы код работал только с английскими значениями:
     сравнивал, записывал в БД и отдавал на фронт.
@@ -13,7 +14,7 @@ class StrEnum(str, Enum):
     class SomeEngRusEnum(StrEnum):
         draft = "draft", "черновик"
 
-    c = SomeEngRusEnum.choices()
+    c = SomeEngRusEnum.choices
     [("draft", "черновик")]
 
     print(SomeEngRusEnum.draft.phrase == "Черновик")  # True
