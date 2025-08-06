@@ -24,11 +24,17 @@ class BaseEventSchema(BaseSchema):
 
 
 class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
-    pass
+    expired_at: datetime = Field(
+        None,
+        description="Время истечения события",
+    )
 
 
 class EventSchema(DBSchemaMixin, BaseEventSchema):
-    pass
+    expired_at: datetime = Field(
+        None,
+        description="Время истечения события",
+    )
 
 
 class EventsCharacteristicsSchema(BaseSchema):

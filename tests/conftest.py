@@ -7,6 +7,7 @@ import pytest_asyncio
 
 from tests.fakers.fake_events_crud import FakeEventCRUD
 
+from app.adapters.db.utils.expire import calculate_expires_at_by_severity
 from app.adapters.schemas.events import EventCreateSchema
 from app.dependencies.containers import Container
 from app.services.events_service import EventService
@@ -65,6 +66,7 @@ def event_data():
     event = next(random_event_generator(1))
     event["created_at"] = datetime.now().isoformat()
     event["updated_at"] = datetime.now().isoformat()
+    event["expired_at"] = calculate_expires_at_by_severity(event.get("severity"))
     event["_id"] = fake.mongo_id()
     return event
 

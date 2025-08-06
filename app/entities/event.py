@@ -11,6 +11,8 @@ class Event(BaseEntity):
     source: str
     severity: int
     timestamp: datetime
+    expired_at: datetime
+
     user_id: str | None = None
     session_id: str | None = None
     trace_id: str | None = None

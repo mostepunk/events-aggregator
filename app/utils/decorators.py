@@ -3,6 +3,7 @@ from functools import wraps
 from typing import Callable
 
 from app import getLogger
+from app.adapters.db.utils.expire import calculate_expires_at_by_severity
 
 logging = getLogger(__name__)
 
@@ -11,6 +12,10 @@ def insert_dates(data):
     if isinstance(data, dict):
         data["created_at"] = data.get("created_at", datetime.now())
         data["updated_at"] = data.get("updated_at", datetime.now())
+        data["expired_at"] = data.get(
+            "expired_at",
+            calculate_expires_at_by_severity(data.get("severity")),
+        )
     return data
 
 

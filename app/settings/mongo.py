@@ -24,6 +24,10 @@ class MongoDBSettings(BaseSettings):
     retry_writes: bool = True
     retry_reads: bool = True
 
+    expire_at_ttl_days_low: int = 7
+    expire_at_ttl_days_medium: int = 30
+    expire_at_ttl_days_critical: int = 90
+
     @property
     def uri(self) -> str:
         return (
