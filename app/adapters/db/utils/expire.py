@@ -6,7 +6,7 @@ from app.settings import config
 logging = getLogger("TTL")
 
 
-def get_ttl_days_by_severity(severity: int) -> int:
+def get_ttl_days_by_severity(severity: int | None) -> int:
     """Вычисляет количество дней хранения события.
 
     Args:
@@ -34,7 +34,7 @@ def get_ttl_days_by_severity(severity: int) -> int:
         return config.mongo.expire_at_ttl_days_low
 
 
-def calculate_expires_at_by_severity(severity: int) -> datetime:
+def calculate_expires_at_by_severity(severity: int | None) -> datetime:
     """Вычисляет дату удаления события.
 
     Args:
