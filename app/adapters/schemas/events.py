@@ -30,7 +30,7 @@ class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
         description="Время истечения события",
     )
 
-    @model_validator(mode="after")
+    @model_validator(mode="before")
     def validate_expires_at(cls, values):
         if values.get("expires_at") is None:
             values["expires_at"] = (

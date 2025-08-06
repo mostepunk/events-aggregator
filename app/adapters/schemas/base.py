@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Optional
 
 from bson.objectid import ObjectId
@@ -62,8 +62,8 @@ class BaseSchema(BaseModel):
 
 
 class BaseInsertSchemaMixin(BaseModel):
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
+    created_at: datetime = datetime.now(timezone.utc)
+    updated_at: datetime = datetime.now(timezone.utc)
 
 
 class DBSchemaMixin(BaseSchema):
