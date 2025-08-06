@@ -4,8 +4,9 @@
 
 from datetime import datetime
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
+from app.adapters.db.utils.expire import calculate_expires_at_by_severity
 from app.adapters.schemas.base import BaseInsertSchemaMixin, BaseSchema, DBSchemaMixin
 from app.utils.enums import PirorityLevelEnum
 
@@ -28,6 +29,14 @@ class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
         None,
         description="Время истечения события",
     )
+
+    @model_validator(mode="after")
+    def validate_expires_at(cls, values):
+        if values.get("expires_at") is None:
+            values["expires_at"] = (
+                calculate_expires_at_by_severity(values.get("severity")),
+            )
+        return values
 
 
 class EventSchema(DBSchemaMixin, BaseEventSchema):

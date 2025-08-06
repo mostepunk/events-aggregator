@@ -80,6 +80,7 @@ known_local_folder = ["app"]
 "UUID" = "from uuid import UUID"
 "uuid4" = "from uuid import uuid4"
 "timedelta" = "from datetime import timedelta"
+"timezone" = "from datetime import timezone"
 "pprint" = "from pprint import pprint"
 #
 # ================ INSTALLED LIBS ================

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from pymongo.asynchronous.database import AsyncDatabase
@@ -54,7 +54,7 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         Returns:
             list[Event]:
         """
-        since = datetime.utcnow() - timedelta(hours=hours)
+        since = datetime.now(timezone.utc) - timedelta(hours=hours)
         res = await self.get_all(
             filters={"created_at": {"$gte": since}}, sort=[("created_at", -1)]
         )
@@ -90,7 +90,7 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         Returns:
             list[dict[str, Any]]:
         """
-        since = datetime.utcnow() - timedelta(days=days)
+        since = datetime.now(timezone.utc) - timedelta(days=days)
 
         pipeline = [
             {"$match": {"created_at": {"$gte": since}}},
@@ -167,7 +167,7 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
             mongo_filter["source"] = {"$in": source.split(",")}
 
         if hours := filter.get("hours"):
-            since = datetime.utcnow() - timedelta(hours=hours)
+            since = datetime.now(timezone.utc) - timedelta(hours=hours)
             mongo_filter["created_at"] = {"$gte": since}
 
         if priority := filter.get("priority"):

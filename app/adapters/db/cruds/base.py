@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Generic, List, TypeVar
 
 from bson.objectid import ObjectId
@@ -78,7 +78,7 @@ class BaseCRUD(Generic[S_in, S_out]):
 
     async def update(self, item_id: ItemID, data: dict[str, Any]) -> S_out:
         item_id = self.convert_id_to_ObjectId(item_id)
-        data["updated_at"] = datetime.utcnow()
+        data["updated_at"] = datetime.now(timezone.utc)
 
         result: UpdateResult = await self.table.update_one(
             {"_id": item_id},
@@ -120,6 +120,6 @@ class BaseCRUD(Generic[S_in, S_out]):
         return item_id
 
     def insert_created_updated(self, data: dict[str, Any]):
-        data["updated_at"] = data.get("updated_at", datetime.utcnow())
-        data["created_at"] = data.get("created_at", datetime.utcnow())
+        data["updated_at"] = data.get("updated_at", datetime.now(timezone.utc))
+        data["created_at"] = data.get("created_at", datetime.now(timezone.utc))
         return data

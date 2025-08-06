@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app import getLogger
 from app.settings import config
@@ -44,4 +44,4 @@ def calculate_expires_at_by_severity(severity: int | None) -> datetime:
         datetime:
     """
     ttl_days = get_ttl_days_by_severity(severity)
-    return datetime.utcnow() + timedelta(days=ttl_days)
+    return datetime.now(timezone.utc) + timedelta(days=ttl_days)

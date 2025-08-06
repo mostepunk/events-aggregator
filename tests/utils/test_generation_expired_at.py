@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pytest
 
@@ -63,7 +63,7 @@ class TestExpiredAt:
             "type": "test",
         }
         result = calculate_expires_at_by_severity(data.get("severity"))
-        to_be = datetime.utcnow() + timedelta(days=LOW)
+        to_be = datetime.now(timezone.utc) + timedelta(days=LOW)
 
         assert result.strftime("%Y-%m-%d %H:%M:%S") == to_be.strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -80,7 +80,7 @@ class TestExpiredAt:
             "type": "test",
         }
         result = calculate_expires_at_by_severity(data.get("severity"))
-        to_be = datetime.utcnow() + timedelta(days=CRITICAL)
+        to_be = datetime.now(timezone.utc) + timedelta(days=CRITICAL)
 
         assert result.strftime("%Y-%m-%d %H:%M:%S") == to_be.strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -97,7 +97,7 @@ class TestExpiredAt:
             "type": "test",
         }
         result = calculate_expires_at_by_severity(data.get("severity"))
-        to_be = datetime.utcnow() + timedelta(days=MEDIUM)
+        to_be = datetime.now(timezone.utc) + timedelta(days=MEDIUM)
 
         assert result.strftime("%Y-%m-%d %H:%M:%S") == to_be.strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -114,7 +114,7 @@ class TestExpiredAt:
             "type": "test",
         }
         result = calculate_expires_at_by_severity(data.get("severity"))
-        to_be = datetime.utcnow() + timedelta(days=LOW)
+        to_be = datetime.now(timezone.utc) + timedelta(days=LOW)
 
         assert result.strftime("%Y-%m-%d %H:%M:%S") == to_be.strftime(
             "%Y-%m-%d %H:%M:%S"

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from pymongo.asynchronous.database import AsyncDatabase
 
@@ -21,7 +21,7 @@ class FakeEventCRUD(FakeBaseCRUD):
         super().__init__(db)
 
     async def get_recent_events(self, hours: int = 24) -> list[Event]:
-        since = datetime.utcnow() - timedelta(hours=hours)
+        since = datetime.now(timezone.utc) - timedelta(hours=hours)
         return await self.get_all(
             filters={"created_at": {"$gte": since}},
             sort=[("created_at", -1)],
