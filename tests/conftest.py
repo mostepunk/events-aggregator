@@ -66,7 +66,7 @@ def event_data():
     event = next(random_event_generator(1))
     event["created_at"] = datetime.now().isoformat()
     event["updated_at"] = datetime.now().isoformat()
-    event["expired_at"] = calculate_expires_at_by_severity(event.get("severity"))
+    event["expires_at"] = calculate_expires_at_by_severity(event.get("severity"))
     event["_id"] = fake.mongo_id()
     return event
 

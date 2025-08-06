@@ -24,14 +24,14 @@ class BaseEventSchema(BaseSchema):
 
 
 class EventCreateSchema(BaseInsertSchemaMixin, BaseEventSchema):
-    expired_at: datetime = Field(
+    expires_at: datetime = Field(
         None,
         description="Время истечения события",
     )
 
 
 class EventSchema(DBSchemaMixin, BaseEventSchema):
-    expired_at: datetime = Field(
+    expires_at: datetime = Field(
         None,
         description="Время истечения события",
     )

@@ -12,8 +12,8 @@ def insert_dates(data):
     if isinstance(data, dict):
         data["created_at"] = data.get("created_at", datetime.now())
         data["updated_at"] = data.get("updated_at", datetime.now())
-        data["expired_at"] = data.get(
-            "expired_at",
+        data["expires_at"] = data.get(
+            "expires_at",
             calculate_expires_at_by_severity(data.get("severity")),
         )
     return data
