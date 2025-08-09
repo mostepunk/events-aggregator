@@ -12,7 +12,8 @@ async def init_indexes() -> None:
     try:
         async with get_database() as db:
             index_manager = IndexManager(db)
-            await index_manager.initialize_all_indexes()
+            result = await index_manager.initialize_all_indexes()
+            logging.info(f"MongoDB indexes initialization result: {result}")
 
     except Exception as e:
         logging.error(f"Failed to initialize MongoDB indexes: {e}")

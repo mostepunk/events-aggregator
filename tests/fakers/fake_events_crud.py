@@ -4,10 +4,9 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from tests.fakers.base_faker import FakeBaseCRUD
 
+from app.adapters.db.const import MongoCollections
 from app.adapters.schemas.events import EventCreateSchema
 from app.entities.event import Event
-
-EVENT_TABLE = "events"
 
 
 class FakeEventCRUD(FakeBaseCRUD):
@@ -15,7 +14,7 @@ class FakeEventCRUD(FakeBaseCRUD):
 
     _in = EventCreateSchema
     _out = Event
-    _table = EVENT_TABLE
+    _table = MongoCollections.events
 
     def __init__(self, db: AsyncDatabase):
         super().__init__(db)

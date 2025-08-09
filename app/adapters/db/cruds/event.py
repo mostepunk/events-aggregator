@@ -4,12 +4,12 @@ from typing import Any
 from pymongo.asynchronous.database import AsyncDatabase
 
 from app import getLogger
+from app.adapters.db.const import MongoCollections
 from app.adapters.db.cruds.base import BaseCRUD
 from app.adapters.schemas.events import EventCreateSchema
 from app.entities.event import Event
 from app.utils.enums import PirorityLevelEnum
 
-EVENT_TABLE = "events"
 logging = getLogger("EventCRUD")
 
 
@@ -18,7 +18,7 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
 
     _in = EventCreateSchema
     _out = Event
-    _table = EVENT_TABLE
+    _table = MongoCollections.events
 
     def __init__(self, db: AsyncDatabase):
         super().__init__(db)

@@ -41,3 +41,9 @@ class PirorityLevelEnum(StrEnum):
     low = "low", "Низкий"
     medium = "medium", "Средний"
     high = "high", "Высокий"
+
+
+class IndexStatusEnum(StrEnum):
+    created = "created", "создан"
+    skipped = "skipped", "пропущен"
+    error = "error", "ошибка"
