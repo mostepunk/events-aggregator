@@ -6,9 +6,9 @@ from pymongo.asynchronous.database import AsyncDatabase
 from app import getLogger
 from app.adapters.db.const import MongoCollections
 from app.adapters.db.cruds.base import BaseCRUD
+from app.adapters.db.utils.mongo_filter import EventFilters
 from app.adapters.schemas.events import EventCreateSchema
 from app.entities.event import Event
-from app.utils.enums import PirorityLevelEnum
 
 logging = getLogger("EventCRUD")
 
@@ -154,43 +154,15 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
         self, filter: dict[str, Any], pagination: dict[str, int | None]
     ) -> list[Event]:
         logging.debug(f"Incoming filter: {filter}")
-        mongo_filter = {}
 
-        sort_field = filter.pop("sort_field", "created_at")
-        sort_order = filter.pop("sort_order", -1)
-        sort = [(sort_field, sort_order)]
-
-        if event_type := filter.get("event_type"):
-            mongo_filter["type"] = {"$in": event_type.split(",")}
-
-        if source := filter.get("source"):
-            mongo_filter["source"] = {"$in": source.split(",")}
-
-        if hours := filter.get("hours"):
-            since = datetime.now(timezone.utc) - timedelta(hours=hours)
-            mongo_filter["created_at"] = {"$gte": since}
-
-        if priority := filter.get("priority"):
-            if priority == PirorityLevelEnum.low:
-                mongo_filter["severity"] = {"$lte": 3}
-
-            elif priority == PirorityLevelEnum.medium:
-                mongo_filter["severity"] = {"$gte": 4, "$lte": 6}
-
-            elif priority == PirorityLevelEnum.high:
-                mongo_filter["severity"] = {"$gte": 7}
-
-        if search := filter.get("search"):
-            mongo_filter["$text"] = {"$search": search}
+        filters = EventFilters(**filter)
+        mongo_filter = filters.to_mongo_filter()
+        sort = filters.sort_options
 
         logging.debug(
             f"Table: <{self._table}>. Filters: {mongo_filter} Sorting: {sort}"
         )
-        res = await self.get_all(
-            filters=mongo_filter,
-            sort=sort,
-            **pagination,
-        )
-        logging.debug(f"Found {len(res)} events")
 
-        return res
+        events = await self.get_all(filters=mongo_filter, sort=sort, **pagination)
+        logging.debug(f"Found {len(events)} events")
+        return events
