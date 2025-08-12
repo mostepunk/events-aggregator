@@ -180,6 +180,9 @@ class EventCRUD(BaseCRUD[EventCreateSchema, Event]):
             elif priority == PirorityLevelEnum.high:
                 mongo_filter["severity"] = {"$gte": 7}
 
+        if search := filter.get("search"):
+            mongo_filter["$text"] = {"$search": search}
+
         logging.debug(
             f"Table: <{self._table}>. Filters: {mongo_filter} Sorting: {sort}"
         )

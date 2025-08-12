@@ -69,6 +69,7 @@ class EventsFilterSchema(BaseSchema):
     priority: PirorityLevelEnum | None = None
     sort_field: str | None = "created_at"
     sort_order: int | None = -1
+    search: str | None = None
 
 
 class GeneratedEventsSchema(BaseSchema):

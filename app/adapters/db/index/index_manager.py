@@ -14,11 +14,21 @@ logging = getLogger("IndexManager")
 
 
 class IndexManager:
+    """IndexManager.
+
+    Инициализация и создание индексов.
+    """
+
     def __init__(self, db: AsyncDatabase):
         self.db = db
         self.log_table = self.db[MongoCollections.index_metrics]
 
-    async def initialize_all_indexes(self):
+    async def initialize_all_indexes(self) -> dict[str, Any]:
+        """Инициализация всех индексов.
+
+        Returns:
+            dict[str, Any]:
+        """
         statistic = {}
         for collection, configs in COLLECTIONS_INDEXES.items():
             result = await self.create_indexes_for_collection(collection, configs)
@@ -30,7 +40,14 @@ class IndexManager:
         table: str,
         index_configs: list[dict[str, Any]],
     ):
+        """Создание индексов для определенной коллекции.
+
+        Args:
+            table (str): имя коллекции
+            index_configs (list[dict[str, Any]]): список конфигов индексов
+        """
         collection = self.db[table]
+        # Заглушка, если понадобится дропнуть все индексы
         # return await collection.drop_indexes()
         existing_indexes: dict[str, Any] = await collection.index_information()
         creation_error: str | None = None
@@ -71,6 +88,17 @@ class IndexManager:
         table: str,
         config: dict[str, Any],
     ) -> str | None:
+        """Проверка и создание индекса.
+
+        Args:
+            collection (AsyncDatabase): подключение к коллекции
+            existing_indexes (dict[str, Any]): существующие индексы
+            table (str): имя коллекции
+            config (dict[str, Any]): конфиг индекса
+
+        Returns:
+            str | None:
+        """
         _config = copy.deepcopy(config)
 
         if (keys := _config.pop("keys", None)) is None:
@@ -83,9 +111,36 @@ class IndexManager:
         if name in existing_indexes:
             return IndexStatusEnum.skipped
 
+        is_text_index = _config.pop("_text_index", False)
+        if is_text_index:
+            await self._drop_existing_text_indexes(collection, existing_indexes)
+
         index_name = await collection.create_index(keys, background=True, **_config)
         logging.info(f"Created index: {index_name}")
         return IndexStatusEnum.created
+
+    async def _drop_existing_text_indexes(
+        self, collection: AsyncDatabase, existing_indexes: dict
+    ) -> None:
+        """Удаляет все существующие text индексы в коллекции.
+
+        Т.к. MongoDB имеет ограничение в один текстовый индекс.
+        Как выход из положения:
+        - Создать отдельный поисковый движок используя Elasticsearch
+        Но для этого надо дублировать данные в момент записи в MongoDB
+        И отправлять их в Elasticsearch
+
+        Args:
+            collection (AsyncDatabase): подключение к коллекции
+            existing_indexes (dict[str, Any]): существующие индексы
+        """
+        for index_name, index_info in existing_indexes.items():
+            # Проверяем является ли индекс текстовым
+            index_key = dict(index_info.get("key"))
+            if any(value == "text" for value in index_key.values()):
+
+                logging.info(f"Dropping existing text index: {index_name}")
+                await collection.drop_index(index_name)
 
     @staticmethod
     def _generate_index_name(collection_name: str, keys: list[tuple[str, int]]) -> str:

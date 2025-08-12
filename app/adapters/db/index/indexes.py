@@ -23,11 +23,25 @@ def get_events_indexes() -> List[Dict]:
         {"keys": [("session_id", 1), ("timestamp", -1)]},
         # 7. Составной индекс для фильтрации критичных событий по времени
         {"keys": [("severity", -1), ("timestamp", -1)]},
-        # 8. Текстовый индекс для поиска по содержимому (создается последним)
+        # 8. Специализированный текстовый индекс для платежных операций
+        # USE CASE: Служба поддержки ищет проблемные платежи
+        # Пример: "Клиент жалуется что платеж по Mastercard через Square не прошел"
+        # Запрос: GET /events?event_type=PAYMENT_SUCCESS,PAYMENT_FAILED&search=mastercard+square
         {
-            "keys": [("payload", "text"), ("metadata", "text"), ("type", "text")],
-            "name": "idx_events_full_text_search",
-            # "default_language": "russian",
+            "_text_index": True,  # Обозначение текстового индекса
+            "keys": [
+                # Платежные поля (работают только для PAYMENT_ событий)
+                ("payload.card_brand", "text"),  # mastercard, visa, amex
+                ("payload.processor", "text"),  # stripe, square, paypal
+                ("payload.payment_method", "text"),  # card, cash, bank_transfer
+                ("payload.currency", "text"),  # USD, EUR, RUB
+                ("payload.transaction_id", "text"),  # для поиска транзакций
+                # Общие поля (работают для всех событий)
+                ("user_id", "text"),  # ID пользователя
+                ("session_id", "text"),  # ID сессии
+                ("trace_id", "text"),  # ID трейсинга
+            ],
+            "name": "idx_events_combined_text",
             "default_language": "english",
         },
     ]
