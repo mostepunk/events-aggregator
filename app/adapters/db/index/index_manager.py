@@ -56,7 +56,7 @@ class IndexManager:
         for config in index_configs:
             start_time = time.time()
             try:
-                status: str | None = await self._create_index(
+                status: IndexStatusEnum | None = await self._create_index(
                     collection, existing_indexes, table, config
                 )
             except Exception as err:
@@ -87,7 +87,7 @@ class IndexManager:
         existing_indexes: dict[str, Any],
         table: str,
         config: dict[str, Any],
-    ) -> str | None:
+    ) -> IndexStatusEnum | None:
         """Проверка и создание индекса.
 
         Args:
@@ -97,7 +97,7 @@ class IndexManager:
             config (dict[str, Any]): конфиг индекса
 
         Returns:
-            str | None:
+            IndexStatusEnum | None: Статус создания, либо None, если ключи для индекса не были переданы
         """
         _config = copy.deepcopy(config)
 

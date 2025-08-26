@@ -7,22 +7,22 @@ def get_events_indexes() -> List[Dict]:
     """Определение индексов для коллекции events"""
     return [
         # 1. Основной составной индекс для мониторинга и фильтрации
-        {"keys": [("type", 1), ("timestamp", -1), ("severity", -1)]},
+        {"keys": [("type", 1), ("created_at", -1), ("severity", -1)]},
         # 2. Индекс для пользовательской активности
-        {"keys": [("user_id", 1), ("timestamp", -1)]},
+        {"keys": [("user_id", 1), ("created_at", -1)]},
         # 3. Индекс для трейсинга и отладки
         {"keys": [("trace_id", 1)]},
         # 4. Индекс для анализа по источникам
-        {"keys": [("source", 1), ("timestamp", -1)]},
+        {"keys": [("source", 1), ("created_at", -1)]},
         # 5. TTL индекс для автоматического удаления старых событий
         {
             "keys": [("expires_at", 1)],
             "expireAfterSeconds": 0,  # Использует значение из поля expires_at
         },
         # 6. Индекс для поиска по session_id (для анализа сессий)
-        {"keys": [("session_id", 1), ("timestamp", -1)]},
+        {"keys": [("session_id", 1), ("created_at", -1)]},
         # 7. Составной индекс для фильтрации критичных событий по времени
-        {"keys": [("severity", -1), ("timestamp", -1)]},
+        {"keys": [("severity", -1), ("created_at", -1)]},
         # 8. Специализированный текстовый индекс для платежных операций
         # USE CASE: Служба поддержки ищет проблемные платежи
         # Пример: "Клиент жалуется что платеж по Mastercard через Square не прошел"
@@ -61,13 +61,13 @@ def get_metrics_indexes() -> List[Dict]:
     """Определение индексов для коллекции metrics"""
     return [
         # 1. Основной индекс для временных рядов метрик
-        {"keys": [("metric_type", 1), ("timestamp", -1)]},
+        {"keys": [("metric_type", 1), ("created_at", -1)]},
         # 2. Составной индекс для группировки по измерениям
         {
             "keys": [
                 ("dimensions.event_type", 1),
                 ("dimensions.source", 1),
-                ("timestamp", -1),
+                ("created_at", -1),
             ],
         },
         # 3. TTL для метрик (обычно хранятся дольше событий)

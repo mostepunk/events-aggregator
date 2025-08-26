@@ -14,12 +14,13 @@ class StrEnum(str, Enum):
     class SomeEngRusEnum(StrEnum):
         draft = "draft", "черновик"
 
-    c = SomeEngRusEnum.choices
+    c = SomeEngRusEnum.choices()
     [("draft", "черновик")]
 
-    print(SomeEngRusEnum.draft.phrase == "Черновик")  # True
+    print(SomeEngRusEnum.draft.phrase == "черновик")  # True
     print(SomeEngRusEnum.draft.name == "draft")  # True
     print(SomeEngRusEnum.draft == "draft")  # True
+    print(SomeEngRusEnum.draft == "черновик")  # False
     """
 
     phrase: str
@@ -36,6 +37,5 @@ class StrEnum(str, Enum):
         return self._value_
 
     @classmethod
-    @property
     def choices(cls):
         return [(status.name, status.phrase) for status in cls]

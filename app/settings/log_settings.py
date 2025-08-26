@@ -18,7 +18,9 @@ EXTERNAL_LOGGERS = [
     "asyncio",
     "multipart",
     "uvicorn",
-    "uvicorn.access",
+    # "uvicorn.access",
+    # "uvicorn.error",
+    # "uvicorn.asgi",
     "fastapi",
 ]
 

@@ -7,3 +7,4 @@ class MongoCollections:
     rules = "rules"
     users = "users"
     index_metrics = "index_metrics"
+    profiler_stat = "profiler_stat"
