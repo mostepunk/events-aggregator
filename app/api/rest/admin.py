@@ -13,7 +13,7 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
     response_model=ProfilerStatusSchema,
 )
 async def profiler_on(
-    data: ProfilerStartSchema = Depends(),
+    data: ProfilerStartSchema,
     service: AdminService = Depends(Container.admin_service),
 ):
     return await service.profiler("on", data.dict(exclude_unset=True))
