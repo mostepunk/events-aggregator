@@ -83,6 +83,7 @@ known_local_folder = ["app"]
 "timezone" = "from datetime import timezone"
 "pprint" = "from pprint import pprint"
 "dataclass" = "from dataclasses import dataclass"
+"asdict" = "from dataclasses import asdict"
 #
 # ================ INSTALLED LIBS ================
 #

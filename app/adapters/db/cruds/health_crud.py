@@ -1,9 +1,9 @@
 from app.adapters.db.cruds.base import BaseCRUD
 from app.adapters.schemas.base import BaseSchema
-from app.entities.base import BaseEntity
+from app.entities.base import DataBaseEntity
 
 IN = BaseSchema
-OUT = BaseEntity
+OUT = DataBaseEntity
 TABLE = "health"
 
 

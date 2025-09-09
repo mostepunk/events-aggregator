@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 
 
 @dataclass
-class BaseEntity:
+class DataBaseEntity:
     _id: ObjectId
     created_at: datetime
     updated_at: datetime

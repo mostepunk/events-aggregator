@@ -1,4 +1,3 @@
-import random
 from typing import Any, Literal
 
 from app import getLogger
@@ -8,28 +7,23 @@ logging = getLogger("AdminService")
 
 
 class AdminService(BaseService):
-    def __init__(self, repository):
-        super().__init__(repository)
-
+    # TODO: покрыть тестами
     async def profiler(
         self, action: Literal["on", "off", "status"], data: dict[str, Any] = None
     ):
         logging.info(f"Profiler {action} with data: {data}")
+
         if action == "on":
-            return {"status": "Profiler turrned on"}
+            profiler = await self.repo.set_profiler(data)
 
         elif action == "off":
-            return {"status": "Profiler turrned off"}
+            data = {"level": 0}
+            profiler = await self.repo.set_profiler(data)
 
         elif action == "status":
-            return {
-                "status": random.choice(
-                    [
-                        "Profiler turrned on",
-                        "Profiler turrned off",
-                    ]
-                )
-            }
+            profiler = await self.repo.get_profiler()
+
+        return profiler.to_dict(verbose=True)
 
     async def get_raw_profiler_data(self):
-        pass
+        return await self.repo.get_profiler_status()

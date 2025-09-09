@@ -5,11 +5,11 @@ from pymongo.asynchronous.database import AsyncDatabase
 
 from app.adapters.db.cruds.base import BaseCRUD
 from app.adapters.schemas.base import BaseSchema
-from app.entities.base import BaseEntity
+from app.entities.base import DataBaseEntity
 from app.utils.type_hints import ItemID
 
 S_in = TypeVar("S_in", bound=BaseSchema)
-S_out = TypeVar("S_out", bound=BaseEntity)
+S_out = TypeVar("S_out", bound=DataBaseEntity)
 
 
 class FakeBaseCRUD(BaseCRUD):

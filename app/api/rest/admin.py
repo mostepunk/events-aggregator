@@ -46,7 +46,7 @@ async def profiler_status(
     summary="Get profiler raw data",
     # response_model=ProfilerStatusSchema,
 )
-async def profiler_reset(
+async def profiler_raw_data(
     service: AdminService = Depends(Container.admin_service),
 ):
     return await service.get_raw_profiler_data()

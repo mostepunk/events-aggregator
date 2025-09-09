@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.entities.base import BaseEntity
+from app.entities.base import DataBaseEntity
 
 
 @dataclass
-class Event(BaseEntity):
+class Event(DataBaseEntity):
     event_id: str
     type: str
     source: str

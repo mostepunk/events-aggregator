@@ -7,7 +7,7 @@ from pymongo.results import DeleteResult, InsertOneResult, UpdateResult
 
 from app import getLogger
 from app.adapters.schemas.base import BaseSchema
-from app.entities.base import BaseEntity
+from app.entities.base import DataBaseEntity
 from app.utils.decorators import insert_created_updated
 from app.utils.type_hints import ItemID
 
@@ -15,7 +15,7 @@ logging = getLogger(__name__)
 
 
 S_in = TypeVar("S_in", bound=BaseSchema)
-S_out = TypeVar("S_out", bound=BaseEntity)
+S_out = TypeVar("S_out", bound=DataBaseEntity)
 
 
 class BaseCRUD(Generic[S_in, S_out]):
